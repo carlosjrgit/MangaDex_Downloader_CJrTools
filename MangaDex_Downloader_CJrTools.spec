@@ -33,7 +33,7 @@ exe = EXE(
     a.binaries,
     a.datas,
     [],
-    name='MangaDex Downloader',
+    name='MangaDex_Downloader_CJrTools',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,

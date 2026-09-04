@@ -1,6 +1,6 @@
-# Guia de Contribuição — CJ Manga Downloader
+# Guia de Contribuição — MangaDex_Downloader_CJrTools
 
-Agradecemos o seu interesse em contribuir para o **CJ Manga Downloader**!
+Agradecemos o seu interesse em contribuir para o **MangaDex_Downloader_CJrTools**!
 Este documento detalha o fluxo de desenvolvimento local, padrões de qualidade e diretrizes de segurança.
 
 ---
@@ -19,8 +19,8 @@ Recomendamos utilizar um ambiente virtual isolado (`venv`):
 
 ```bash
 # 1. Clonar o repositório
-git clone https://github.com/<usuario>/<repositorio>.git
-cd <repositorio>
+git clone https://github.com/carlosjrgit/MangaDex_Downloader_CJrTools.git
+cd MangaDex_Downloader_CJrTools
 
 # 2. Criar o ambiente virtual
 python -m venv .venv

@@ -1,9 +1,9 @@
 """
-Diálogo "Sobre" oficial do CJ Manga Downloader.
+Diálogo "Sobre" oficial do MangaDex_Downloader_CJrTools.
 Segue rigorosamente o Design System:
 - Exibe o card vitrine em fundo branco (#FFFFFF) para a logo CJR DOOM garantindo nitidez e contraste perfeitos.
 - Textos oficiais:
-    CJ Manga Downloader
+    MangaDex_Downloader_CJrTools
     Version 1.0.0
 
     Designed and developed by
@@ -41,7 +41,7 @@ from styles import (
 class AboutDialog(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setWindowTitle("Sobre — CJ Manga Downloader")
+        self.setWindowTitle("Sobre — MangaDex_Downloader_CJrTools")
         self.setFixedSize(460, 520)
         self.setWindowFlags(self.windowFlags() & ~Qt.WindowContextHelpButtonHint)
         self.setStyleSheet(DARK_THEME)
@@ -97,7 +97,7 @@ class AboutDialog(QDialog):
         info_layout.setSpacing(6)
         info_layout.setAlignment(Qt.AlignCenter)
 
-        lbl_title = QLabel("CJ Manga Downloader")
+        lbl_title = QLabel("MangaDex_Downloader_CJrTools")
         lbl_title.setAlignment(Qt.AlignCenter)
         lbl_title.setStyleSheet(f"""
             font-size: 20px;

@@ -1,4 +1,4 @@
-# CJ Manga Downloader (mangadex-dl)
+# MangaDex_Downloader_CJrTools
 
 > **Downloader Desktop (GUI & CLI) de alta performance para MangaDex, MangaLivre e fontes web com Design System Dark Minimalista, Fila de Tarefas, Estimativa de Tempo/Tamanho e Empacotamento CBZ.**
 
@@ -76,7 +76,7 @@ mangadex-dl/
 ├── mangalivre.py         # Módulo de raspagem e download para mangalivre
 ├── providers.py          # Provedores de mangá (MangaDex, MangaLivre, Madara, Universal)
 ├── styles.py             # Design Tokens e folhas de estilo CSS/QSS oficiais
-├── MangaDex Downloader.spec # Especificação PyInstaller para build de executáveis
+├── MangaDex_Downloader_CJrTools.spec # Especificação PyInstaller para build de executáveis
 ├── requirements.txt      # Dependências de execução
 ├── requirements-dev.txt  # Dependências de desenvolvimento e testes
 ├── pyproject.toml        # Metadados e configurações de linters/scanners
@@ -99,8 +99,8 @@ mangadex-dl/
 
 ```bash
 # Clone o repositório
-git clone https://github.com/<usuario>/mangadex-dl.git
-cd mangadex-dl
+git clone https://github.com/carlosjrgit/MangaDex_Downloader_CJrTools.git
+cd MangaDex_Downloader_CJrTools
 
 # Crie um ambiente virtual (recomendado)
 python -m venv .venv
@@ -178,7 +178,7 @@ Para gerar uma versão executável standalone para Windows utilizando o PyInstal
 pip install pyinstaller
 
 # Execute a compilação a partir do arquivo spec oficial
-pyinstaller "MangaDex Downloader.spec"
+pyinstaller "MangaDex_Downloader_CJrTools.spec"
 ```
 O executável gerado estará localizado na pasta `dist/`.
 

@@ -1,6 +1,6 @@
 """
 Testes automatizados para validação do Design System oficial,
-identidade visual CJ Manga Downloader, assets e tela Sobre.
+identidade visual MangaDex_Downloader_CJrTools, assets e tela Sobre.
 """
 
 import sys
@@ -24,7 +24,7 @@ class TestDesignSystem(unittest.TestCase):
 
     def test_app_metadata(self):
         """Valida que o nome e metadados do software foram atualizados corretamente."""
-        self.assertEqual(mangadex_gui.APP_NAME, "CJ Manga Downloader")
+        self.assertEqual(mangadex_gui.APP_NAME, "MangaDex_Downloader_CJrTools")
         self.assertEqual(mangadex_gui.ORGANIZATION_NAME, "CJRDOOM")
         self.assertEqual(mangadex_gui.__version__, "1.0.0")
 
@@ -74,7 +74,7 @@ class TestDesignSystem(unittest.TestCase):
         texts = [lbl.text() for lbl in labels if lbl.text()]
 
         # Validação dos textos requeridos
-        self.assertTrue(any("CJ Manga Downloader" in t for t in texts), "Título ausente na tela Sobre")
+        self.assertTrue(any("MangaDex_Downloader_CJrTools" in t for t in texts), "Título ausente na tela Sobre")
         self.assertTrue(any("Version 1.0.0" in t for t in texts), "Versão 1.0.0 ausente na tela Sobre")
         self.assertTrue(any("Designed and developed by" in t for t in texts), "Crédito 'Designed and developed by' ausente")
         self.assertTrue(any("CJRDOOM" in t for t in texts), "Crédito 'CJRDOOM' ausente")
@@ -87,7 +87,7 @@ class TestDesignSystem(unittest.TestCase):
     def test_main_window_instantiation(self):
         """Valida que a janela principal instancia com o tema oficial e widgets corretos."""
         win = mangadex_gui.MainWindow()
-        self.assertIn("CJ Manga Downloader", win.windowTitle())
+        self.assertIn("MangaDex_Downloader_CJrTools", win.windowTitle())
         self.assertIsNotNone(win.table)
         self.assertIsNotNone(win.btn_add_urls)
         self.assertIsNotNone(win.btn_start)

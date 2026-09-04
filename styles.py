@@ -1,5 +1,5 @@
 """
-Implementação Oficial do Design System para CJ Manga Downloader.
+Implementação Oficial do Design System para MangaDex_Downloader_CJrTools.
 Direção Visual: Dark, Minimal, Flat, Geometric, Technical.
 Princípio Visual: Flat, not plain.
 """

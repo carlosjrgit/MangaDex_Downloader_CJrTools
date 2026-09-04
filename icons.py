@@ -1,5 +1,5 @@
 """
-Sistema de Ícones Phosphor Icons para CJ Manga Downloader.
+Sistema de Ícones Phosphor Icons para MangaDex_Downloader_CJrTools.
 Segue o Design System:
 - Biblioteca: Phosphor Icons
 - Peso Padrão: Regular

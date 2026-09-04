@@ -1,4 +1,4 @@
-# Política de Segurança — CJ Manga Downloader
+# Política de Segurança — MangaDex_Downloader_CJrTools
 
 Levamos a segurança e a privacidade de nossos usuários e colaboradores muito a sério.
 Este documento descreve as diretrizes para relatar vulnerabilidades e boas práticas de segurança do projeto.

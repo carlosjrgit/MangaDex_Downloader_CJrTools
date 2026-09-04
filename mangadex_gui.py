@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-CJ Manga Downloader — Interface Gráfica Oficial
+MangaDex_Downloader_CJrTools — Interface Gráfica Oficial
 Design System: Dark, Minimal, Flat, Geometric, Technical.
 Gerenciador de Fila de Tarefas com Estimativa de Tempo/Tamanho,
 Pausar/Continuar/Parar, Retomada Automática e Seleção Avançada de Capítulos.
@@ -73,7 +73,7 @@ from styles import (
     RADIUS_SECONDARY
 )
 
-APP_NAME = "CJ Manga Downloader"
+APP_NAME = "MangaDex_Downloader_CJrTools"
 ORGANIZATION_NAME = "CJRDOOM"
 __version__ = "1.0.0"
 
