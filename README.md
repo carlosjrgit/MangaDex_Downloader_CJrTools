@@ -4,7 +4,27 @@
 
 ---
 
-## 📸 Identidade Visual & Design System
+## 📸 Demonstração Visual da Interface
+
+<p align="center">
+  <img src="assets/screenshots/screenshot_main.png" alt="Interface Principal do MangaDex_Downloader_CJrTools" width="95%" />
+</p>
+<p align="center">
+  <em>Interface Gráfica Oficial: Tema Dark Flat Geométrico, Fila de Tarefas Inteligente, Telemetria ao Vivo e Terminal Integrado.</em>
+</p>
+
+<br>
+
+<p align="center">
+  <img src="assets/screenshots/screenshot_about.png" alt="Diálogo Sobre e Identidade Visual CJR DOOM" width="380px" />
+</p>
+<p align="center">
+  <em>Diálogo "Sobre" oficial com card vitrine em alto contraste da marca CJR DOOM.</em>
+</p>
+
+---
+
+## 🎨 Identidade Visual & Design System
 
 Desenvolvido segundo especificações técnicas de design industrial minimalista:
 - **Tema:** Dark Flat Geométrico (`#2E2D2D` background, `#FFAC2B` accent dourado, `#363535` surface).
@@ -57,9 +77,10 @@ O projeto passou por uma rigorosa auditoria de segurança de software defensivo:
 ## 📦 Estrutura do Projeto
 
 ```text
-mangadex-dl/
+MangaDex_Downloader_CJrTools/
 ├── assets/
 │   ├── icons/            # Ícones vetoriais Phosphor Icons (regular e fill)
+│   ├── screenshots/      # Capturas visuais da interface para documentação
 │   ├── logo.png          # Logomarca oficial CJR DOOM
 │   └── logo.jpg          # Logomarca em alta resolução
 ├── tests/
