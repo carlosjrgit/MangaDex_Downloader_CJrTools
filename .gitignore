@@ -1,0 +1,70 @@
+# Bytecode e Cache Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Ambientes Virtuais
+venv/
+.venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# Distribuição, Empacotamento e Compilação
+build/
+dist/
+*.exe
+*.dll
+*.dylib
+*.bin
+*.manifest
+*.spec.bak
+
+# Dados do Usuário, Downloads e Estado de Execução
+download/
+downloads/
+queue_state.json
+mangadex_dl_progress.json
+*.cbz
+*.part
+*.tmp
+
+# Backups e Cópias Locais
+* - Copia.py
+* - Copy.py
+*.bak
+*.orig
+*~
+
+# Variáveis de Ambiente e Segredos
+.env
+.env.*
+!.env.example
+secrets.*
+credentials.*
+*.pem
+*.key
+*.p12
+
+# Metadados de IDEs e Editores
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+.project
+.pydevproject
+
+# Metadados de Sistema Operacional
+.DS_Store
+Thumbs.db
+desktop.ini
+$RECYCLE.BIN/
+
+# Relatórios de Testes e Cobertura
+.coverage
+htmlcov/
+.pytest_cache/
+.tox/

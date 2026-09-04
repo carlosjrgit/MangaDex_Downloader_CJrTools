@@ -1,0 +1,8 @@
+# Dependências de Desenvolvimento, Testes e Segurança
+-r requirements.txt
+
+playwright>=1.30.0
+pyinstaller>=6.0.0
+ruff>=0.4.0
+bandit>=1.7.5
+pip-audit>=2.7.0

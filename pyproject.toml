@@ -1,0 +1,47 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mangadex-dl"
+version = "1.0.0"
+description = "Downloader moderno em GUI (PyQt5) e CLI para MangaDex, MangaLivre e fontes web."
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [
+    { name = "Carlos Junior" }
+]
+dependencies = [
+    "PyQt5>=5.15.0",
+    "requests>=2.28.0",
+    "urllib3>=1.26.0",
+    "beautifulsoup4>=4.11.0",
+    "tqdm>=4.64.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "playwright>=1.30.0",
+    "pyinstaller>=6.0.0",
+    "ruff>=0.4.0",
+    "bandit>=1.7.5",
+    "pip-audit>=2.7.0",
+]
+
+[tool.ruff]
+line-length = 120
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "B", "S"]
+ignore = [
+    "E501",  # Comprimento de linha gerenciado
+    "S311",  # Pseudo-random não criptográfico (não usado para segurança)
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["S101", "S105", "S106"]  # Permite asserts em testes
+
+[tool.bandit]
+exclude_dirs = ["tests", "build", "dist", ".venv", "venv"]
+skips = ["B311", "B101"]
