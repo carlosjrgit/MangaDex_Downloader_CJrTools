@@ -12,20 +12,19 @@ import time
 import html
 import subprocess
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import List, Optional
 
-from PyQt5.QtCore import Qt, QThread, pyqtSignal, QTimer
-from PyQt5.QtGui import QColor, QFont, QIcon, QKeySequence, QPixmap
+from PyQt5.QtCore import Qt, QThread, pyqtSignal
+from PyQt5.QtGui import QColor, QIcon, QKeySequence, QPixmap
 from PyQt5.QtWidgets import (
     QAction, QApplication, QCheckBox, QComboBox, QFileDialog, QFrame,
     QGroupBox, QHBoxLayout, QHeaderView, QLabel, QLineEdit,
     QMainWindow, QMenu, QMessageBox, QProgressBar, QPushButton,
-    QShortcut, QSplitter, QTableWidget, QTableWidgetItem, QTextEdit,
+    QShortcut, QTableWidget, QTableWidgetItem, QTextEdit,
     QVBoxLayout, QWidget
 )
 
 from manga_core import (
-    AVG_PAGES_PER_CHAPTER,
     ChapterMode,
     DownloadEngine,
     ExecutionController,
@@ -34,43 +33,27 @@ from manga_core import (
     StateManager,
     TaskStatus,
     calculate_task_estimates,
-    clean_filename,
     create_session,
-    find_id_in_url,
     format_size,
     format_time,
-    get_mangadex_chapters,
-    get_mangadex_info,
-    get_mangadex_uuid,
-    choose_mangadex_title,
-    parse_chapter_selection,
-    safe_path_join
+    parse_chapter_selection
 )
-import mangalivre
 
 from about_dialog import AboutDialog
-from icons import get_icon, get_pixmap
+from icons import get_icon
 from styles import (
     COLOR_ACCENT,
-    COLOR_BACKGROUND,
     COLOR_BORDER_STRONG,
-    COLOR_BORDER_SUBTLE,
     COLOR_ERROR,
     COLOR_INFO,
     COLOR_SUCCESS,
-    COLOR_SURFACE,
-    COLOR_SURFACE_ACTIVE,
-    COLOR_SURFACE_DISABLED,
     COLOR_SURFACE_ELEVATED,
     COLOR_TEXT_DISABLED,
     COLOR_TEXT_PRIMARY,
     COLOR_TEXT_SECONDARY,
     COLOR_WARNING,
     DARK_THEME,
-    FONT_MONOSPACE,
-    FONT_PRIMARY,
-    RADIUS_DEFAULT,
-    RADIUS_SECONDARY
+    RADIUS_DEFAULT
 )
 
 APP_NAME = "MangaDex_Downloader_CJrTools"

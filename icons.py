@@ -10,7 +10,6 @@ Segue o Design System:
 
 import sys
 from pathlib import Path
-import re
 from typing import Dict, Optional, Tuple
 
 from PyQt5.QtCore import QByteArray, Qt

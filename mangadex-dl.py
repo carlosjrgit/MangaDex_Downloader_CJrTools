@@ -11,7 +11,7 @@ import os
 import signal
 import sys
 import time
-from typing import Any, Dict, List, Optional
+from typing import List
 
 from tqdm import tqdm
 
@@ -35,14 +35,9 @@ from manga_core import (
     create_session,
     format_size,
     format_time,
-    get_mangadex_chapters,
-    get_mangadex_info,
-    get_mangadex_uuid,
-    choose_mangadex_title,
     parse_chapter_selection,
     safe_path_join
 )
-import mangalivre
 
 __version__ = "1.0.0"
 
@@ -114,7 +109,6 @@ def print_queue_summary(tasks: List[QueueTask]):
 def run_cli_queue(tasks: List[QueueTask], args: argparse.Namespace):
     controller = ExecutionController()
     engine = DownloadEngine(controller=controller)
-    session = create_session()
 
     # Manipulador de sinal de interrupção (Ctrl+C)
     def sigint_handler(signum, frame):
@@ -240,9 +234,9 @@ def main():
 
     args = parser.parse_args()
 
-    print(f"\n=======================================================")
+    print("\n=======================================================")
     print(f" MangaDex & MangaLivre Downloader CLI v{__version__}")
-    print(f"=======================================================\n")
+    print("=======================================================\n")
 
     urls_to_process = []
 

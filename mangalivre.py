@@ -13,7 +13,7 @@ import sys
 import time
 import zipfile
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from typing import Any, Callable, Dict, List, Optional, Tuple
+from typing import Any, Callable, Dict, List, Optional
 from urllib.parse import urlparse
 
 import requests
@@ -68,11 +68,11 @@ def extract_chapter_number(text_or_url: str) -> str:
     match = re.search(r'capitulo-(\d+(?:[\.-]\d+)?)', text_or_url, re.IGNORECASE)
     if match:
         return match.group(1).replace('-', '.')
-    
+
     match_num = re.search(r'(\d+(?:\.\d+)?)', text_or_url)
     if match_num:
         return match_num.group(1)
-    
+
     return "0"
 
 

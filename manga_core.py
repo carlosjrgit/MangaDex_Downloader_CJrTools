@@ -10,7 +10,6 @@ import logging
 import os
 import re
 import shutil
-import sys
 import threading
 import time
 import zipfile

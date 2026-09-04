@@ -10,10 +10,9 @@ Implementa a arquitetura em cascata:
 import html
 import json
 import logging
-import os
 import re
 from abc import ABC, abstractmethod
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional
 from urllib.parse import urljoin, urlparse
 
 import requests

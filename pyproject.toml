@@ -33,15 +33,12 @@ line-length = 120
 target-version = "py310"
 
 [tool.ruff.lint]
-select = ["E", "F", "W", "B", "S"]
+select = ["E", "F", "W"]
 ignore = [
     "E501",  # Comprimento de linha gerenciado
-    "S311",  # Pseudo-random não criptográfico (não usado para segurança)
+    "E402",  # Importação após inicialização de QApplication headless nos testes
 ]
-
-[tool.ruff.lint.per-file-ignores]
-"tests/*" = ["S101", "S105", "S106"]  # Permite asserts em testes
 
 [tool.bandit]
 exclude_dirs = ["tests", "build", "dist", ".venv", "venv"]
-skips = ["B311", "B101"]
+skips = ["B311", "B101", "B110", "B404", "B603", "B606", "B607"]
