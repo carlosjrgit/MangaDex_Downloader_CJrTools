@@ -35,6 +35,11 @@ Desenvolvido segundo especificações técnicas de design industrial minimalista
 
 ## 🚀 Principais Recursos
 
+- **🔍 Análise Prévia Inteligente ("Analisar Link"):**
+  - **Inspeção em Segundo Plano:** Consulta o link sem travar a interface, exibindo a capa oficial e o total de capítulos.
+  - **Detecção Automática de Idiomas:** Menu suspenso dinâmico com os idiomas traduzidos reais disponíveis (Português `pt-br`, Inglês `en`, Espanhol `es-la`, Japonês `ja`, etc.).
+  - **Orientação Direta de Capítulos:** Dica visual e suporte flexível a intervalos (`1-10` ou `1,10`), capítulos únicos (`5`) ou listas avulsas (`1, 6, 10`).
+  - **Estimativa Instantânea:** Cálculo imediato da contagem selecionada, tamanho em MB/GB e tempo previsto antes de adicionar à fila.
 - **Suporte Multi-Provedor:**
   - **MangaDex (API v5):** Suporte nativo completo com seleção de idioma, deduplicação de versões e modo DataSaver.
   - **MangaLivre:** Extração direta de capítulos e páginas com contorno de bloqueios de leitura.
@@ -44,20 +49,22 @@ Desenvolvido segundo especificações técnicas de design industrial minimalista
   - Estimativa antecipada de tamanho total (MB/GB) e tempo estimado para download.
   - Execução sequencial com controle de threads paralelas por capítulo (padrão: 4 workers).
   - Pausar, Retomar e Cancelar tarefas ativas sem perder progresso.
-  - Importação de links em lote via arquivos de texto (`.txt`).
+  - Importação de links em lote via arquivos de texto (`.txt`) ou adição direta via botão `+ Fila Direta`.
 - **Modos Flexíveis de Seleção de Capítulos:**
   - **Todos:** Baixa a obra completa do início ao fim.
   - **Único:** Baixa apenas um capítulo específico (ex: `12` ou `45.5`).
-  - **Intervalo:** Baixa do capítulo X ao Y (ex: `1-20` ou `50~100`).
+  - **Intervalo:** Baixa do capítulo X ao Y (ex: `1-20`, `1,10` ou `50~100`).
   - **Blocos (Chunk):** Baixa em lotes (ex: primeiros `10`).
   - **Mais Recente:** Baixa apenas o último capítulo lançado.
-  - **Personalizado:** Expressões flexíveis combinadas (ex: `1, 3, 5-10, oneshot`).
+  - **Personalizado:** Expressões flexíveis combinadas (ex: `1, 6, 10`, `1-10, 15`).
 - **Empacotamento Automático:**
   - Agrupamento de páginas nomeadas ordenadamente (`001.jpg`, `002.jpg`...).
   - Compactação direta no formato padrão para leitores de quadrinhos digitais (`.cbz`).
   - Limpeza automática de arquivos residuais e pastas temporárias após o empacotamento.
+- **Barras de Rolagem com Design Inteligente & Cor Sólida:**
+  - Trilho e cursores em cores sólidas de alto contraste, com feedback dinâmico em hover e clique dourado.
 - **Interfaces Duplas:**
-  - **Interface Gráfica Completa (GUI):** `mangadex_gui.py` via PyQt5.
+  - **Interface Gráfica Completa (GUI):** `mangadex_gui.py` via PyQt5 com layout responsivo para janelas compactas ou tela cheia.
   - **Linha de Comando (CLI):** `mangadex-dl.py` via argparse para automações, servidores ou uso no terminal.
 
 ---

@@ -64,6 +64,46 @@ class ChapterMode(str, Enum):
     CUSTOM = "custom"      # Expressão personalizada (ex: 1, 3, 5-10)
 
 
+# Mapeamento de Códigos de Idioma para Nomes Amigáveis
+LANGUAGE_NAMES: Dict[str, str] = {
+    "pt-br": "Português (Brasil)",
+    "pt": "Português",
+    "en": "English (Inglês)",
+    "es": "Español",
+    "es-la": "Español (Latinoamérica)",
+    "ja": "日本語 (Japonês)",
+    "ko": "한국어 (Coreano)",
+    "zh": "中文 (Chinês)",
+    "zh-hk": "繁體中文 (Tradicional)",
+    "fr": "Français (Francês)",
+    "de": "Deutsch (Alemão)",
+    "it": "Italiano",
+    "ru": "Русский (Russo)",
+    "id": "Bahasa Indonesia",
+    "vi": "Tiếng Việt (Vietnamita)",
+    "tr": "Türkçe (Turco)",
+    "pl": "Polski (Polonês)",
+    "ar": "العربية (Árabe)",
+    "th": "ไทย (Tailandês)",
+    "uk": "Українська (Ucraniano)",
+    "hu": "Magyar (Húngaro)",
+    "cs": "Čeština (Tcheco)",
+    "nl": "Nederlands (Holandês)",
+    "sv": "Svenska (Sueco)"
+}
+
+
+def get_language_display_name(code: str) -> str:
+    """Retorna nome amigável legível para o código ISO de idioma."""
+    if not code:
+        return "Desconhecido"
+    code_clean = str(code).strip().lower()
+    friendly = LANGUAGE_NAMES.get(code_clean)
+    if friendly:
+        return f"{friendly} [{code_clean}]"
+    return f"Idioma [{code_clean}]"
+
+
 @dataclass
 class QueueTask:
     id: str
@@ -296,10 +336,11 @@ def parse_chapter_selection(
         except ValueError:
             pass
 
-    elif mode == ChapterMode.RANGE or (mode == ChapterMode.CHUNK and "-" in clean_val):
+    elif mode == ChapterMode.RANGE or (mode == ChapterMode.CHUNK and ("-" in clean_val or "," in clean_val)):
         try:
-            if "-" in clean_val:
-                s_str, e_str = clean_val.split("-", 1)
+            sep = "-" if "-" in clean_val else ("," if "," in clean_val else None)
+            if sep:
+                s_str, e_str = clean_val.split(sep, 1)
                 start = float(s_str.strip())
                 end = float(e_str.strip())
                 min_val, max_val = min(start, end), max(start, end)

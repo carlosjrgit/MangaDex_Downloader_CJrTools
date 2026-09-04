@@ -4,7 +4,7 @@ Segue rigorosamente o Design System:
 - Exibe o card vitrine em fundo branco (#FFFFFF) para a logo CJR DOOM garantindo nitidez e contraste perfeitos.
 - Textos oficiais:
     MangaDex_Downloader_CJrTools
-    Version 1.0.0
+    Version 1.1.0
 
     Designed and developed by
     CJRDOOM
@@ -102,7 +102,7 @@ class AboutDialog(QDialog):
             letter-spacing: 0.5px;
         """)
 
-        lbl_version = QLabel("Version 1.0.0")
+        lbl_version = QLabel("Version 1.1.0")
         lbl_version.setAlignment(Qt.AlignCenter)
         lbl_version.setStyleSheet(f"""
             font-family: {FONT_MONOSPACE};

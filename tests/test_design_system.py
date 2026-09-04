@@ -26,7 +26,7 @@ class TestDesignSystem(unittest.TestCase):
         """Valida que o nome e metadados do software foram atualizados corretamente."""
         self.assertEqual(mangadex_gui.APP_NAME, "MangaDex_Downloader_CJrTools")
         self.assertEqual(mangadex_gui.ORGANIZATION_NAME, "CJRDOOM")
-        self.assertEqual(mangadex_gui.__version__, "1.0.0")
+        self.assertEqual(mangadex_gui.__version__, "1.1.0")
 
     def test_assets_exist(self):
         """Valida a existência dos assets oficiais (logo e ícones Phosphor)."""
@@ -75,7 +75,7 @@ class TestDesignSystem(unittest.TestCase):
 
         # Validação dos textos requeridos
         self.assertTrue(any("MangaDex_Downloader_CJrTools" in t for t in texts), "Título ausente na tela Sobre")
-        self.assertTrue(any("Version 1.0.0" in t for t in texts), "Versão 1.0.0 ausente na tela Sobre")
+        self.assertTrue(any("Version 1.1.0" in t for t in texts), "Versão 1.1.0 ausente na tela Sobre")
         self.assertTrue(any("Designed and developed by" in t for t in texts), "Crédito 'Designed and developed by' ausente")
         self.assertTrue(any("CJRDOOM" in t for t in texts), "Crédito 'CJRDOOM' ausente")
         self.assertTrue(any("© 2026 Carlos Junior" in t for t in texts), "Copyright ausente")

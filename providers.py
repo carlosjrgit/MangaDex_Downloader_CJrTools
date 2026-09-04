@@ -81,6 +81,16 @@ class BaseMangaProvider(ABC):
         """Retorna o nome da scan/grupo associado ao capítulo."""
         return chapter.get("group") or self.display_name
 
+    def get_chapters_for_language(
+        self,
+        url: str,
+        lang_code: str,
+        session: requests.Session
+    ) -> List[Dict[str, Any]]:
+        """Retorna a lista de capítulos para um idioma específico."""
+        info = self.get_manga_info(url, session, lang_code=lang_code)
+        return info.get("chapters", [])
+
     def get_request_headers(self, page_url: str) -> Dict[str, str]:
         """Headers adicionais (ex: Referer) para download das imagens."""
         parsed = urlparse(page_url)
@@ -176,7 +186,23 @@ class MangaDexProvider(BaseMangaProvider):
             except Exception:
                 pass
 
-        # Buscar Capítulos
+        # Buscar Capítulos via método auxiliar
+        normalized_chapters = self._fetch_chapters(uuid, lang_code, session)
+
+        return {
+            "title": title,
+            "cover_url": cover_url,
+            "available_langs": available_langs,
+            "chapters": normalized_chapters
+        }
+
+    def _fetch_chapters(
+        self,
+        uuid: str,
+        lang_code: str,
+        session: requests.Session
+    ) -> List[Dict[str, Any]]:
+        """Busca e deduplica todos os capítulos para um idioma no MangaDex."""
         ratings = "&".join([
             "contentRating[]=safe", "contentRating[]=suggestive",
             "contentRating[]=erotica", "contentRating[]=pornographic"
@@ -231,13 +257,16 @@ class MangaDexProvider(BaseMangaProvider):
                 "relationships": ch.get("relationships", []),
                 "attributes": ch.get("attributes", {})
             })
+        return normalized_chapters
 
-        return {
-            "title": title,
-            "cover_url": cover_url,
-            "available_langs": available_langs,
-            "chapters": normalized_chapters
-        }
+    def get_chapters_for_language(
+        self,
+        url: str,
+        lang_code: str,
+        session: requests.Session
+    ) -> List[Dict[str, Any]]:
+        uuid = self._get_uuid(url, session)
+        return self._fetch_chapters(uuid, lang_code, session)
 
     def get_chapter_group(self, chapter: Dict[str, Any], session: requests.Session) -> str:
         group_ids = [rel["id"] for rel in chapter.get("relationships", []) if rel.get("type") == "scanlation_group"]

@@ -63,6 +63,7 @@ QWidget {{
 QLabel {{
     background-color: transparent;
     color: {COLOR_TEXT_PRIMARY};
+    padding: 0px;
 }}
 
 QMainWindow, QDialog {{
@@ -100,7 +101,7 @@ QGroupBox {{
     border: 1px solid {COLOR_BORDER_SUBTLE};
     border-radius: {RADIUS_DEFAULT};
     margin-top: 14px;
-    padding: 14px 12px 12px 12px;
+    padding-top: 14px;
     font-weight: 600;
     font-size: 13px;
 }}
@@ -426,44 +427,106 @@ QToolTip {{
     font-size: 12px;
 }}
 
-/* Scrollbars Retas e Discretas */
+/* ======================================================================
+   Barras de Rolagem com Design Inteligente e Cor Sólida de Alto Contraste
+   ====================================================================== */
 QScrollBar:vertical {{
-    background-color: {COLOR_BACKGROUND};
-    width: 10px;
-    margin: 0;
+    background-color: #161616;
+    width: 12px;
+    margin: 2px;
+    border-radius: 6px;
+    border: 1px solid #242424;
 }}
 
 QScrollBar::handle:vertical {{
-    background-color: {COLOR_SURFACE_ELEVATED};
-    min-height: 24px;
-    border-radius: 2px;
+    background-color: #3C3C3C;
+    min-height: 28px;
+    border-radius: 4px;
+    border: none;
 }}
 
 QScrollBar::handle:vertical:hover {{
-    background-color: {COLOR_BORDER_STRONG};
+    background-color: #555555;
+}}
+
+QScrollBar::handle:vertical:pressed {{
+    background-color: {COLOR_ACCENT};
 }}
 
 QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {{
     height: 0px;
+    background: transparent;
+    border: none;
+}}
+
+QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {{
+    background: transparent;
 }}
 
 QScrollBar:horizontal {{
-    background-color: {COLOR_BACKGROUND};
-    height: 10px;
-    margin: 0;
+    background-color: #161616;
+    height: 12px;
+    margin: 2px;
+    border-radius: 6px;
+    border: 1px solid #242424;
 }}
 
 QScrollBar::handle:horizontal {{
-    background-color: {COLOR_SURFACE_ELEVATED};
-    min-width: 24px;
-    border-radius: 2px;
+    background-color: #3C3C3C;
+    min-width: 28px;
+    border-radius: 4px;
+    border: none;
 }}
 
 QScrollBar::handle:horizontal:hover {{
-    background-color: {COLOR_BORDER_STRONG};
+    background-color: #555555;
+}}
+
+QScrollBar::handle:horizontal:pressed {{
+    background-color: {COLOR_ACCENT};
 }}
 
 QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal {{
     width: 0px;
+    background: transparent;
+    border: none;
+}}
+
+QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal {{
+    background: transparent;
+}}
+
+QAbstractScrollArea::corner {{
+    background-color: #161616;
+    border: none;
+}}
+
+/* Card de Análise Prévia da Obra */
+QFrame#AnalysisCard {{
+    background-color: {COLOR_SURFACE};
+    border: 1px solid {COLOR_BORDER_SUBTLE};
+    border-radius: {RADIUS_DEFAULT};
+}}
+
+QLabel#AnalysisTitle {{
+    color: {COLOR_TEXT_PRIMARY};
+    font-size: 15px;
+    font-weight: 700;
+}}
+
+QLabel#BadgeProvider {{
+    background-color: {COLOR_SURFACE_ELEVATED};
+    color: {COLOR_ACCENT};
+    border: 1px solid {COLOR_BORDER_SUBTLE};
+    border-radius: {RADIUS_SECONDARY};
+    padding: 2px 8px;
+    font-size: 11px;
+    font-weight: 600;
+}}
+
+QLabel#ChapsBadge {{
+    color: {COLOR_ACCENT};
+    font-weight: 600;
+    font-size: 13px;
 }}
 """
