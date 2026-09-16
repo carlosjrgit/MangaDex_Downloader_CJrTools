@@ -20,7 +20,11 @@ from manga_core import (
     parse_chapter_selection,
     safe_path_join
 )
-from providers import UniversalPlaywrightProvider
+from providers import (
+    UniversalPlaywrightProvider,
+    configure_playwright_environment,
+    launch_playwright_browser
+)
 
 
 class TestSecurityAndCore(unittest.TestCase):
@@ -121,6 +125,20 @@ class TestSecurityAndCore(unittest.TestCase):
         self.assertFalse(prov.can_handle("file:///C:/Windows/system32"))
         self.assertFalse(prov.can_handle("ftp://ftp.example.com"))
         self.assertFalse(prov.can_handle("not-a-valid-url"))
+
+    def test_playwright_environment_and_launch_resilience(self):
+        """Verifica se o ambiente de navegadores do Playwright é configurado e se launch_playwright_browser é resiliente."""
+        configure_playwright_environment()
+        self.assertIn("PLAYWRIGHT_BROWSERS_PATH", os.environ)
+        self.assertTrue(bool(os.environ["PLAYWRIGHT_BROWSERS_PATH"]))
+
+        # Testa com mock do playwright_instance e fallback automático
+        mock_p = MagicMock()
+        mock_p.chromium.launch.side_effect = [RuntimeError("Default failed"), MagicMock()]
+        browser = launch_playwright_browser(mock_p, headless=True)
+        self.assertIsNotNone(browser)
+        self.assertEqual(mock_p.chromium.launch.call_count, 2)
+
 
     # ------------------------------------------------------------------
     # 4. Testes de Núcleo: Seleção de Capítulos, Estimativas e Estado

@@ -28,6 +28,8 @@ download/
 downloads/
 queue_state.json
 mangadex_dl_progress.json
+catalog_cache/
+scratch/
 *.cbz
 *.part
 *.tmp
@@ -67,4 +69,5 @@ $RECYCLE.BIN/
 .coverage
 htmlcov/
 .pytest_cache/
+.ruff_cache/
 .tox/

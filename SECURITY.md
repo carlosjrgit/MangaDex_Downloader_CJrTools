@@ -1,4 +1,4 @@
-# Política de Segurança — MangaDex_Downloader_CJrTools
+# Política de Segurança — MangaHubRip_CJrTools
 
 Levamos a segurança e a privacidade de nossos usuários e colaboradores muito a sério.
 Este documento descreve as diretrizes para relatar vulnerabilidades e boas práticas de segurança do projeto.
@@ -11,8 +11,8 @@ Apenas a versão estável mais recente mantida na branch principal (`main`) rece
 
 | Versão | Suportada |
 | :--- | :--- |
-| `1.0.x` (Atual) | :white_check_mark: Sim |
-| `< 1.0.0` | :x: Não |
+| `2.0.x` (Atual) | :white_check_mark: Sim |
+| `< 2.0.0` | :x: Não |
 
 ---
 

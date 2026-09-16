@@ -1,16 +1,41 @@
-# MangaDex_Downloader_CJrTools
+# MangaHubRip_CJrTools
 
-> **Downloader Desktop (GUI & CLI) de alta performance para MangaDex, MangaLivre e fontes web com Design System Dark Minimalista, Fila de Tarefas, Estimativa de Tempo/Tamanho e Empacotamento CBZ.**
+<p align="center">
+  <img src="assets/logo.png" alt="MangaHubRip_CJrTools Logo" width="160px" />
+</p>
+
+<p align="center">
+  <strong>v2.0.0</strong> • <em>Designed and developed by <strong>CJRDOOM</strong></em> • © 2026 Carlos Junior
+</p>
+
+<p align="center">
+  <a href="#-demonstração-visual-da-interface"><img src="https://img.shields.io/badge/GUI-PyQt5-FFAC2B.svg?style=flat-square" alt="GUI PyQt5" /></a>
+  <a href="#-principais-recursos"><img src="https://img.shields.io/badge/Fontes-Keiyoushi%202200%2B-22C55E.svg?style=flat-square" alt="Fontes Keiyoushi" /></a>
+  <a href="#-segurança-e-hardening-de-código"><img src="https://img.shields.io/badge/Security-SSDLC%20Audited-38BDF8.svg?style=flat-square" alt="Security Audited" /></a>
+  <a href="#-instalação-e-execução"><img src="https://img.shields.io/badge/Python-3.10%2B-blue.svg?style=flat-square" alt="Python 3.10+" /></a>
+  <a href="https://github.com/carlosjrgit/MangaDex_Downloader_CJrTools/releases/tag/v2.0.0"><img src="https://img.shields.io/badge/Release-v2.0.0-orange.svg?style=flat-square" alt="GitHub Release" /></a>
+</p>
+
+> **MangaHubRip_CJrTools é uma poderosa suíte desktop para arquivamento e download de mangás, manhwas e manhuas. Integrando a robusta base de fontes Keiyoushi, suporte nativo a grandes plataformas (MangaDex, MangaFire, MangaLivre, sites WordPress/Madara) e um motor universal com bypass stealth anti-bot, o programa permite explorar catálogos por idioma, enfileirar capítulos com download paralelo de alta velocidade e empacotar automaticamente suas leituras em arquivos digitais .CBZ organizados.**
 
 ---
 
 ## 📸 Demonstração Visual da Interface
 
 <p align="center">
-  <img src="assets/screenshots/screenshot_main.png" alt="Interface Principal do MangaDex_Downloader_CJrTools" width="95%" />
+  <img src="assets/screenshots/screenshot_main.png" alt="Interface Principal do MangaHubRip_CJrTools" width="95%" />
 </p>
 <p align="center">
-  <em>Interface Gráfica Oficial: Tema Dark Flat Geométrico, Fila de Tarefas Inteligente, Telemetria ao Vivo e Terminal Integrado.</em>
+  <em>Interface Principal: Tema Dark Flat Geométrico, Gerenciador de Fila Sequencial, Telemetria ao Vivo e Controle Completo de Tarefas.</em>
+</p>
+
+<br>
+
+<p align="center">
+  <img src="assets/screenshots/screenshot_sources.png" alt="Aba Explorar Fontes" width="95%" />
+</p>
+<p align="center">
+  <em>Aba "Explorar Fontes": Navegue por mais de 2.200 extensões Keiyoushi, filtre por idioma (PT-BR, EN, etc.), visualize capas e adicione capítulos diretamente à fila.</em>
 </p>
 
 <br>
@@ -19,199 +44,147 @@
   <img src="assets/screenshots/screenshot_about.png" alt="Diálogo Sobre e Identidade Visual CJR DOOM" width="380px" />
 </p>
 <p align="center">
-  <em>Diálogo "Sobre" oficial com card vitrine em alto contraste da marca CJR DOOM.</em>
+  <em>Diálogo "Sobre" oficial: Identidade visual CJR DOOM em alto contraste com descrição e créditos completos.</em>
 </p>
 
 ---
 
 ## 🎨 Identidade Visual & Design System
 
-Desenvolvido segundo especificações técnicas de design industrial minimalista:
-- **Tema:** Dark Flat Geométrico (`#2E2D2D` background, `#FFAC2B` accent dourado, `#363535` surface).
-- **Ícones:** Vetoriais de alta fidelidade baseados em *Phosphor Icons*.
-- **Controle Total:** Fila com pausa, retomada automática (Smart Resume), cancelamento individual e métricas em tempo real (velocidade em MB/s e estimativa de tempo de conclusão).
+O software foi construído seguindo rigorosamente a direção de design industrial e técnico:
+- **Estética:** Dark, Minimal, Flat, Geometric e Technical (*"Flat, not plain"*).
+- **Paleta de Cores Oficial:**
+  - `Background`: `#2E2D2D`
+  - `Surface`: `#363535`
+  - `Surface Elevated`: `#3D3C3C`
+  - `Surface Active`: `#454444`
+  - `Accent / Destaque`: `#FFAC2B` (Laranja/Ouro)
+  - `Border Strong`: `#9E9E9E`
+  - `Text Primary`: `#F0F0F0` | `Text Secondary`: `#BDBDBD`
+- **Tipografia:** *Inter* para a interface e *JetBrains Mono* para logs e valores técnicos.
+- **Iconografia:** Vetorial e consistente baseada em *Phosphor Icons* (24px padrão).
+- **Geometria:** Borda reta com raio padrão de `4px`. Zero gradientes chamativos, zero excesso de sombras ou glassmorphism.
+- **Responsividade Dinâmica:** Layout inteligente que se adapta fluidamente em tela cheia ou janelas compactas, garantindo que nenhum texto seja cortado ou sobreposto.
 
 ---
 
-## 🚀 Principais Recursos
+## 🚀 Principais Recursos da Versão 2.0.0
 
-- **🔍 Análise Prévia Inteligente ("Analisar Link"):**
-  - **Inspeção em Segundo Plano:** Consulta o link sem travar a interface, exibindo a capa oficial e o total de capítulos.
-  - **Detecção Automática de Idiomas:** Menu suspenso dinâmico com os idiomas traduzidos reais disponíveis (Português `pt-br`, Inglês `en`, Espanhol `es-la`, Japonês `ja`, etc.).
-  - **Orientação Direta de Capítulos:** Dica visual e suporte flexível a intervalos (`1-10` ou `1,10`), capítulos únicos (`5`) ou listas avulsas (`1, 6, 10`).
-  - **Estimativa Instantânea:** Cálculo imediato da contagem selecionada, tamanho em MB/GB e tempo previsto antes de adicionar à fila.
-- **Suporte Multi-Provedor:**
-  - **MangaDex (API v5):** Suporte nativo completo com seleção de idioma, deduplicação de versões e modo DataSaver.
-  - **MangaLivre:** Extração direta de capítulos e páginas com contorno de bloqueios de leitura.
-  - **Madara CMS (WordPress):** Suporte a centenas de scans baseadas no motor WordPress Madara / WP-Manga.
-  - **Extrator Universal Heurístico:** Fallback automático para páginas de mangá via sniffer de rede integrado.
-- **Gerenciador de Fila de Tarefas:**
-  - Estimativa antecipada de tamanho total (MB/GB) e tempo estimado para download.
-  - Execução sequencial com controle de threads paralelas por capítulo (padrão: 4 workers).
-  - Pausar, Retomar e Cancelar tarefas ativas sem perder progresso.
-  - Importação de links em lote via arquivos de texto (`.txt`) ou adição direta via botão `+ Fila Direta`.
-- **Modos Flexíveis de Seleção de Capítulos:**
-  - **Todos:** Baixa a obra completa do início ao fim.
-  - **Único:** Baixa apenas um capítulo específico (ex: `12` ou `45.5`).
-  - **Intervalo:** Baixa do capítulo X ao Y (ex: `1-20`, `1,10` ou `50~100`).
-  - **Blocos (Chunk):** Baixa em lotes (ex: primeiros `10`).
-  - **Mais Recente:** Baixa apenas o último capítulo lançado.
-  - **Personalizado:** Expressões flexíveis combinadas (ex: `1, 6, 10`, `1-10, 15`).
-- **Empacotamento Automático:**
-  - Agrupamento de páginas nomeadas ordenadamente (`001.jpg`, `002.jpg`...).
-  - Compactação direta no formato padrão para leitores de quadrinhos digitais (`.cbz`).
-  - Limpeza automática de arquivos residuais e pastas temporárias após o empacotamento.
-- **Barras de Rolagem com Design Inteligente & Cor Sólida:**
-  - Trilho e cursores em cores sólidas de alto contraste, com feedback dinâmico em hover e clique dourado.
-- **Interfaces Duplas:**
-  - **Interface Gráfica Completa (GUI):** `mangadex_gui.py` via PyQt5 com layout responsivo para janelas compactas ou tela cheia.
-  - **Linha de Comando (CLI):** `mangadex-dl.py` via argparse para automações, servidores ou uso no terminal.
+### 🌐 1. Explorador de Fontes Keiyoushi (2.200+ Fontes)
+- Integração nativa com o índice consolidado Keiyoushi (`index.pb`).
+- Filtro imediato por idioma (Português `pt-br`, Inglês `en`, Espanhol `es`, Japonês `ja`, etc.).
+- Paginação dinâmica e busca rápida de fontes por nome ou domínio.
+- Botão direto **⬇️ Baixar** que abre um diálogo simplificado para escolher os capítulos e enviá-los à fila em 1 clique.
 
----
+### ⚡ 2. Suporte Avançado a Plataformas & SPAs Modernas
+- **MangaFire (`mangafire.to`):**
+  - Navegação em catálogo paginado via Playwright headless stealth.
+  - Seleção síncrona do idioma desejado (`LANG`) com suporte oficial a PT-BR.
+  - Interceptação de tráfego de rede da API do leitor (`/api/chapters/<id>`) para coletar 100% das páginas na ordem correta.
+  - Envio do cabeçalho `Referer` específico para a CDN de imagens, contornando bloqueios de acesso (HTTP 403).
+- **MangaDex (API v5):** Consulta assíncrona, paginação rápida, deduplicação de grupos e modo DataSaver.
+- **MangaLivre:** Captura completa com contorno de proteção.
+- **Madara / WP-Manga (WordPress):** Compatível com dezenas de sites baseados em CMS de mangás.
+- **Motor Universal Heurístico:** Extração por Playwright e sniffer de requisições de imagem para qualquer site web.
 
-## 🛡️ Segurança e Hardening de Código
+### 📥 3. Gerenciador de Fila & Telemetria em Tempo Real
+- Execução sequencial com controle de threads paralelas de download (padrão: 4 workers).
+- Métricas ao vivo: velocidade média de download em MB/s, tempo restante estimado (ETA) e bytes baixados.
+- Controle de ciclo de vida: Pausar, Retomar e Parar fila a qualquer momento.
+- Seleção flexível de capítulos:
+  - **Todos:** Baixa a obra completa.
+  - **Único:** Baixa apenas o capítulo selecionado (ex: `1`).
+  - **Intervalo:** Baixa do capítulo X ao Y (ex: `1-10` ou `50-100`).
+  - **Blocos:** Baixa de N em N capítulos.
+  - **Personalizado:** Expressões combinadas (ex: `1, 3, 5-10`).
 
-O projeto passou por uma rigorosa auditoria de segurança de software defensivo:
-- **Proteção contra Path Traversal:** Implementação de `safe_path_join` com canonicalização canônica estrita (`os.path.realpath` / `os.path.commonpath`), impedindo qualquer escape de diretório de destino.
-- **Sanitização Robusta de Nomes:** A função `clean_filename` neutraliza caracteres inválidos no Windows/Linux, remove caracteres de controle ASCII (`\x00` a `\x1f`), trata nomes reservados do Windows (`CON`, `PRN`, `AUX`, `NUL`, etc.) e limita comprimento para evitar estouro de `MAX_PATH`.
-- **Validação de Protocolos de Rede:** Rejeição explícita de esquemas de arquivo local (`file://`), permitindo estritamente conexões remotas via `http://` e `https://`.
-- **Navegador Seguro:** Isolamento do contexto web sem flags perigosas que desativem a Same-Origin Policy (SOP).
-- **Persistência Atômica:** Salvamento de estado da fila via arquivos temporários e substituição atômica (`os.replace`), prevenindo corrupção de dados por interrupções abruptas.
-- **Privilégio Mínimo:** O software é projetado para rodar em espaço de usuário comum, sem exigir direitos de Administrador ou `root`.
+### 📚 4. Empacotamento Automático em `.CBZ`
+- Renomeação numérica normalizada e sequencial de páginas (`001.jpg`, `002.jpg`...).
+- Compactação direta no formato padrão para leitura digital (`.cbz`).
+- Exclusão e limpeza automática das pastas de imagens temporárias após a criação do arquivo final.
 
 ---
 
-## 📦 Estrutura do Projeto
+## 🛡️ Segurança e Hardening de Código (SSDLC)
 
-```text
-MangaDex_Downloader_CJrTools/
-├── assets/
-│   ├── icons/            # Ícones vetoriais Phosphor Icons (regular e fill)
-│   ├── screenshots/      # Capturas visuais da interface para documentação
-│   ├── logo.png          # Logomarca oficial CJR DOOM
-│   └── logo.jpg          # Logomarca em alta resolução
-├── tests/
-│   ├── test_design_system.py    # Validação da identidade visual e tokens
-│   └── test_security_and_core.py # Validação de segurança, path traversal e core
-├── .github/
-│   ├── workflows/ci.yml         # Pipeline automatizado de CI (testes, lint e SAST)
-│   └── dependabot.yml           # Atualizações semanais automatizadas de dependências
-├── about_dialog.py       # Diálogo "Sobre" oficial do software
-├── icons.py              # Provedor dinâmico e vetorial de ícones
-├── manga_core.py         # Núcleo de downloads, fila, persistência e segurança
-├── mangadex-dl.py        # Ponto de entrada da Interface em Linha de Comando (CLI)
-├── mangadex_gui.py       # Ponto de entrada da Interface Gráfica (GUI)
-├── mangalivre.py         # Módulo de raspagem e download para mangalivre
-├── providers.py          # Provedores de mangá (MangaDex, MangaLivre, Madara, Universal)
-├── styles.py             # Design Tokens e folhas de estilo CSS/QSS oficiais
-├── MangaDex_Downloader_CJrTools.spec # Especificação PyInstaller para build de executáveis
-├── requirements.txt      # Dependências de execução
-├── requirements-dev.txt  # Dependências de desenvolvimento e testes
-├── pyproject.toml        # Metadados e configurações de linters/scanners
-├── .editorconfig         # Padronização de codificação e estilo de arquivos
-├── .gitignore            # Exclusão de artefatos de build, dados e temporários
-├── SECURITY.md           # Política de reporte de vulnerabilidades
-├── CONTRIBUTING.md       # Guia para novos desenvolvedores
-└── README.md             # Esta documentação
-```
+O projeto cumpre com as diretrizes do nosso ciclo de desenvolvimento seguro:
+- **Proteção contra Path Traversal:** Canonicalização rigorosa com `safe_path_join`, impedindo escapes de diretório via nomes manipulados.
+- **Sanitização de Nomes:** A função `clean_filename` neutraliza caracteres de controle ASCII, caracteres reservados do Windows (`CON`, `PRN`, `AUX`, `NUL`, etc.) e previne estouros de caminho (`MAX_PATH`).
+- **Validação de Protocolos de Rede:** Rejeição estrita de esquemas inseguros (`file://`, `gopher://`, `javascript:`), restringindo a conexões remotas `http://` e `https://`.
+- **Persistência Atômica:** Salvamento de fila de tarefas com substituição atômica (`os.replace`), prevenindo corrupção em caso de queda de energia ou desligamento repentino.
+- **Sem Segredos Versionados:** Zero credenciais hardcoded, tokens de API ou arquivos privados no histórico do repositório.
 
 ---
 
-## ⚙️ Instalação e Execução
+## 📥 Instalação e Execução
 
-### 1. Pré-requisitos
-- Python 3.10 ou superior instalado no sistema.
+### Opção A — Executável Pré-Compilado (Windows x64)
+Para usuários que desejam executar o programa diretamente, sem instalar Python ou dependências:
+1. Acesse a página oficial de [GitHub Releases](https://github.com/carlosjrgit/MangaDex_Downloader_CJrTools/releases/tag/v2.0.0).
+2. Baixe o executável `MangaHubRip_CJrTools-v2.0.0-Windows-x64.exe`.
+3. *(Opcional)* Verifique a integridade do arquivo através do arquivo `SHA256SUMS.txt`.
+4. Execute o programa com dois cliques.
+
+---
+
+### Opção B — Executando a Partir do Código-Fonte
+
+#### 1. Pré-requisitos
+- Python 3.10 ou superior (testado em Python 3.14).
 - Gerenciador de pacotes `pip`.
 
-### 2. Clonando e Configurando o Ambiente
-
-```bash
-# Clone o repositório
+#### 2. Clonar o Repositório
+```powershell
 git clone https://github.com/carlosjrgit/MangaDex_Downloader_CJrTools.git
 cd MangaDex_Downloader_CJrTools
-
-# Crie um ambiente virtual (recomendado)
-python -m venv .venv
-
-# Ative o ambiente virtual:
-# Windows (PowerShell):
-.venv\Scripts\Activate.ps1
-# Linux / macOS:
-source .venv/bin/activate
-
-# Instale as dependências
-pip install --upgrade pip
-pip install -r requirements.txt
 ```
 
-*(Opcional)* Se desejar suporte completo ao extrator universal web:
-```bash
-pip install playwright
+#### 3. Instalar Dependências
+```powershell
+pip install -r requirements.txt
 playwright install chromium
 ```
 
----
-
-## 🖥️ Como Usar
-
-### Interface Gráfica (GUI)
-Para iniciar a aplicação desktop:
-```bash
-python mangadex_gui.py
-```
-
-1. Cole uma ou mais URLs de obras no campo de texto ou importe uma lista via botão **Arquivo .txt**.
-2. Clique em **Adicionar à Fila**.
-3. Selecione o modo de capítulos desejado (Todos, Intervalo, etc.).
-4. Clique em **Iniciar Downloads**. O progresso, estimativas e métricas ao vivo serão atualizados na interface.
-
-### Linha de Comando (CLI)
-Exemplos práticos de uso no terminal:
-
-```bash
-# Baixar obra completa do MangaDex
-python mangadex-dl.py https://mangadex.org/title/a1c7c817-4e59-43b7-9365-09675a149a6f
-
-# Baixar apenas os capítulos de 1 a 10
-python mangadex-dl.py https://mangadex.org/title/a1c7c817-4e59-43b7-9365-09675a149a6f --range 1-10
-
-# Baixar lista de URLs a partir de um arquivo .txt com 8 threads simultâneas
-python mangadex-dl.py -f mangas.txt -j 8
-
-# Baixar apenas o capítulo mais recente do MangaLivre
-python mangadex-dl.py https://mangalivre.blog/manga/eleceed/ --latest
-
-# Retomar fila de downloads pendentes anterior
-python mangadex-dl.py --resume
-```
+#### 4. Iniciar a Aplicação
+- **Modo Gráfico (GUI):**
+  ```powershell
+  python mangadex_gui.py
+  ```
+- **Modo Linha de Comando (CLI):**
+  ```powershell
+  python mangadex-dl.py --url "https://mangafire.to/title/0rm7-monster-tale" --lang pt-br --all
+  ```
 
 ---
 
-## 🧪 Testes Automatizados
+## ⚙️ Compilação do Executável (.exe)
 
-O projeto possui suítes abrangentes de testes unitários para o Design System, tokens, persistência, estimativas, sanitização de caminhos e validação de segurança:
+Caso deseje compilar seu próprio executável a partir do código-fonte:
 
-```bash
-python -m unittest discover tests -v
+```powershell
+# 1. Instalar ferramentas de desenvolvimento
+pip install -r requirements-dev.txt
+
+# 2. Executar o PyInstaller utilizando a especificação oficial
+pyinstaller MangaHubRip_CJrTools.spec --noconfirm
+```
+
+O executável final será gerado em `dist/MangaHubRip_CJrTools.exe`.
+
+---
+
+## 🧪 Execução dos Testes Automatizados
+
+O repositório conta com uma suíte de testes unitários que valida a integridade de segurança, os tokens de design system e os motores de provedores:
+
+```powershell
+python -m unittest discover tests
 ```
 
 ---
 
-## 🏗️ Gerando o Executável (.exe)
+## 📄 Licença e Direitos Autorais
 
-Para gerar uma versão executável standalone para Windows utilizando o PyInstaller:
-
-```bash
-# Instale as dependências de build
-pip install pyinstaller
-
-# Execute a compilação a partir do arquivo spec oficial
-pyinstaller "MangaDex_Downloader_CJrTools.spec"
-```
-O executável gerado estará localizado na pasta `dist/`.
-
----
-
-## 📄 Licença
-
-Consulte a documentação e histórico do projeto para detalhes sobre termos de uso e redistribuição. O núcleo original do downloader baseia-se em código distribuído sob a licença **GNU General Public License v3.0 (GPLv3)**.
+- **Desenvolvido por:** CJRDOOM
+- **Copyright:** © 2026 Carlos Junior. Todos os direitos reservados.
+- O software é fornecido para fins educacionais e de arquivamento pessoal de obras legitimamente disponíveis publicamente na web.

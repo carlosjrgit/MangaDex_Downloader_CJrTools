@@ -13,6 +13,18 @@ import sys
 import time
 from typing import List
 
+# Configura caminho de navegadores do Playwright para compatibilidade com executável congelado
+if "PLAYWRIGHT_BROWSERS_PATH" not in os.environ:
+    if sys.platform == "win32":
+        _local_appdata = os.environ.get("LOCALAPPDATA") or os.path.expanduser(r"~\AppData\Local")
+        os.environ["PLAYWRIGHT_BROWSERS_PATH"] = os.path.join(_local_appdata, "ms-playwright")
+    elif sys.platform == "darwin":
+        os.environ["PLAYWRIGHT_BROWSERS_PATH"] = os.path.expanduser("~/Library/Caches/ms-playwright")
+    else:
+        _cache_home = os.environ.get("XDG_CACHE_HOME") or os.path.expanduser("~/.cache")
+        os.environ["PLAYWRIGHT_BROWSERS_PATH"] = os.path.join(_cache_home, "ms-playwright")
+
+
 from tqdm import tqdm
 
 if hasattr(sys.stdout, "reconfigure"):

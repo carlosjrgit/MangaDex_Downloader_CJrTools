@@ -8,19 +8,31 @@ Pausar/Continuar/Parar, Retomada Automática e Seleção Avançada de Capítulos
 
 import os
 import sys
+
+# Configura caminho de navegadores do Playwright para compatibilidade com executável congelado
+if "PLAYWRIGHT_BROWSERS_PATH" not in os.environ:
+    if sys.platform == "win32":
+        _local_appdata = os.environ.get("LOCALAPPDATA") or os.path.expanduser(r"~\AppData\Local")
+        os.environ["PLAYWRIGHT_BROWSERS_PATH"] = os.path.join(_local_appdata, "ms-playwright")
+    elif sys.platform == "darwin":
+        os.environ["PLAYWRIGHT_BROWSERS_PATH"] = os.path.expanduser("~/Library/Caches/ms-playwright")
+    else:
+        _cache_home = os.environ.get("XDG_CACHE_HOME") or os.path.expanduser("~/.cache")
+        os.environ["PLAYWRIGHT_BROWSERS_PATH"] = os.path.join(_cache_home, "ms-playwright")
+
 import time
 import html
 import subprocess
 from pathlib import Path
 from typing import List, Optional
 
-from PyQt5.QtCore import Qt, QThread, pyqtSignal
+from PyQt5.QtCore import QPoint, Qt, QThread, pyqtSignal
 from PyQt5.QtGui import QColor, QIcon, QKeySequence, QPixmap
 from PyQt5.QtWidgets import (
-    QAction, QApplication, QCheckBox, QComboBox, QFileDialog, QFrame,
-    QGroupBox, QHBoxLayout, QHeaderView, QLabel, QLineEdit,
+    QAction, QApplication, QCheckBox, QComboBox, QDialog, QFileDialog, QFrame,
+    QGraphicsDropShadowEffect, QGroupBox, QHBoxLayout, QHeaderView, QLabel, QLineEdit,
     QMainWindow, QMenu, QMessageBox, QProgressBar, QPushButton,
-    QShortcut, QSizePolicy, QTableWidget, QTableWidgetItem, QTextEdit,
+    QShortcut, QSizePolicy, QSplitter, QTabWidget, QTableWidget, QTableWidgetItem, QTextEdit,
     QVBoxLayout, QWidget
 )
 
@@ -51,6 +63,7 @@ from styles import (
     COLOR_ERROR,
     COLOR_INFO,
     COLOR_SUCCESS,
+    COLOR_SURFACE,
     COLOR_SURFACE_ELEVATED,
     COLOR_TEXT_DISABLED,
     COLOR_TEXT_PRIMARY,
@@ -60,9 +73,14 @@ from styles import (
     RADIUS_DEFAULT
 )
 
-APP_NAME = "MangaDex_Downloader_CJrTools"
+import requests
+from keiyoushi_catalog import KeiyoushiSource, catalog
+from source_catalog_fetcher import fetch_source_catalog
+from chapter_download_dialog import ChapterDownloadDialog
+
+APP_NAME = "MangaHubRip_CJrTools"
 ORGANIZATION_NAME = "CJRDOOM"
-__version__ = "1.1.0"
+__version__ = "2.0.0"
 
 
 # ----------------------------------------------------------------------
@@ -84,8 +102,13 @@ class MangaAnalysisWorker(QThread):
             session = create_session()
             self.status_signal.emit("Identificando provedor do link...")
             provider = ProviderRegistry.get_provider_for_url(self.url, session=session)
-            self.status_signal.emit(f"Consultando metadados em {provider.display_name}...")
+
+            source_preview = getattr(provider, "get_source_info", lambda u: None)(self.url)
+            prov_initial = f"{source_preview.name} ({source_preview.lang})" if source_preview else provider.display_name
+            self.status_signal.emit(f"Consultando metadados em {prov_initial}...")
+
             info = provider.get_manga_info(self.url, session=session, lang_code=self.lang_code)
+            prov_display = info.get("provider_display") or prov_initial
 
             cover_bytes = None
             cover_url = info.get("cover_url", "")
@@ -101,7 +124,7 @@ class MangaAnalysisWorker(QThread):
             result = {
                 "url": self.url,
                 "provider": provider.name,
-                "provider_display": provider.display_name,
+                "provider_display": prov_display,
                 "title": info["title"],
                 "cover_url": cover_url,
                 "cover_bytes": cover_bytes,
@@ -135,6 +158,63 @@ class LanguageSwitchWorker(QThread):
             self.finished_signal.emit(self.new_lang_code, chaps)
         except Exception as e:
             self.error_signal.emit(str(e))
+
+
+# ----------------------------------------------------------------------
+# Workers do Catálogo de Fontes e Miniaturas (QThread)
+# ----------------------------------------------------------------------
+class MangaCatalogWorker(QThread):
+    """Carrega o catálogo de mangás de uma fonte específica em background sem travar a interface."""
+    finished_signal = pyqtSignal(list, int)  # (mangas_list, page)
+    error_signal = pyqtSignal(str)
+    status_signal = pyqtSignal(str)
+
+    def __init__(self, source: KeiyoushiSource, page: int = 1, force_refresh: bool = False, parent=None):
+        super().__init__(parent)
+        self.source = source
+        self.page = page
+        self.force_refresh = force_refresh
+
+    def run(self):
+        try:
+            self.status_signal.emit(f"Buscando obras em '{self.source.name}' (pág. {self.page})...")
+            mangas = fetch_source_catalog(self.source, page=self.page, force_refresh=self.force_refresh)
+            self.finished_signal.emit(mangas, self.page)
+        except Exception as e:
+            self.error_signal.emit(str(e))
+
+
+class CoverThumbnailWorker(QThread):
+    """Carrega miniaturas de capa assincronamente para a vitrine de mangás."""
+    cover_loaded = pyqtSignal(int, bytes)  # (row_index, img_bytes)
+
+    def __init__(self, items: list, headers: dict = None, parent=None):
+        super().__init__(parent)
+        self.items = items  # list of (row_index, cover_url)
+        self.headers = headers or {}
+        self._is_cancelled = False
+
+    def cancel(self):
+        self._is_cancelled = True
+
+    def run(self):
+        session = requests.Session()
+        session.headers.update({
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+            **self.headers
+        })
+        for row_idx, cover_url in self.items:
+            if self._is_cancelled:
+                break
+            if not cover_url:
+                continue
+            try:
+                r = session.get(cover_url, timeout=6)
+                if r.status_code == 200 and r.content:
+                    self.cover_loaded.emit(row_idx, r.content)
+            except Exception:
+                pass
+            time.sleep(0.04)
 
 
 # ----------------------------------------------------------------------
@@ -263,6 +343,10 @@ class QueueWorker(QThread):
                     self.task_updated.emit(task.to_dict())
                     StateManager.save_queue(self.tasks)
 
+                    # Intervalo moderado para evitar WAF/rate-limits em fontes web dinâmicas
+                    if task.provider in ("keiyoushi", "universal") and ch_idx < total_chaps and not self.controller.is_stopped() and not self.controller.is_task_cancelled():
+                        time.sleep(1.0)
+
                 # Finalizacao da Tarefa
                 if self.controller.is_task_cancelled():
                     self.log_signal.emit(f"[CANCELADO] Tarefa '{task.title}' cancelada pelo usuario.")
@@ -274,9 +358,10 @@ class QueueWorker(QThread):
                     self.log_signal.emit(f"[INTERROMPIDO] Tarefa '{task.title}' interrompida.")
                 elif task_has_error and len(task.downloaded_chapter_ids) < len(task.selected_chapters):
                     task.status = TaskStatus.ERROR
-                    failed_str = ", ".join(failed_chapters[:5])
-                    if len(failed_chapters) > 5:
-                        failed_str += f" (+{len(failed_chapters)-5} outros)"
+                    failed_unique = list(dict.fromkeys(failed_chapters))
+                    failed_str = ", ".join(failed_unique[:5])
+                    if len(failed_unique) > 5:
+                        failed_str += f" (+{len(failed_unique)-5} outros)"
                     chap_detail = f"Falha no download dos capitulos: {failed_str}."
                     if task.error_message:
                         task.error_message = f"{task.error_message} | {chap_detail}"
@@ -302,6 +387,12 @@ class QueueWorker(QThread):
             completed_count = sum(1 for t in self.tasks if t.status == TaskStatus.COMPLETED)
             self.queue_progress.emit(completed_count, len(self.tasks))
 
+        try:
+            for p in ProviderRegistry.get_providers():
+                p.close_session()
+        except Exception:
+            pass
+
         self.log_signal.emit("\nProcessamento da fila finalizado.")
         self.finished_queue.emit()
 
@@ -316,7 +407,7 @@ class QueueWorker(QThread):
             task.title = info["title"]
             task.cover_url = info.get("cover_url", "")
             task.available_langs = info.get("available_langs", ["pt-br"])
-            task.all_chapters = info["chapters"]
+            task.all_chapters = info.get("chapters") or info.get("all_chapters", [])
 
             task.status = TaskStatus.READY
             if not task.selected_chapters:
@@ -349,6 +440,154 @@ class QueueTableWidget(QTableWidget):
 
 
 # ----------------------------------------------------------------------
+# Pop-up Flutuante para Pré-visualização Ampliada de Capas
+# ----------------------------------------------------------------------
+class CoverPreviewPopup(QFrame):
+    """
+    Janela flutuante elegante que exibe a capa do mangá ampliada em alta
+    definição com detalhes ao passar o cursor sobre a miniatura.
+    """
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setWindowFlags(Qt.ToolTip | Qt.FramelessWindowHint | Qt.WindowDoesNotAcceptFocus)
+        self.setAttribute(Qt.WA_ShowWithoutActivating, True)
+        self.setAttribute(Qt.WA_TransparentForMouseEvents, True)
+
+        self.setStyleSheet(f"""
+            CoverPreviewPopup {{
+                background-color: {COLOR_SURFACE_ELEVATED};
+                border: 2px solid {COLOR_ACCENT};
+                border-radius: 8px;
+            }}
+        """)
+
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(10, 10, 10, 10)
+        layout.setSpacing(6)
+
+        # Label da Capa Ampliada (260x370 em alta definição)
+        self.lbl_image = QLabel(self)
+        self.lbl_image.setAlignment(Qt.AlignCenter)
+        self.lbl_image.setFixedSize(260, 370)
+        self.lbl_image.setStyleSheet(f"""
+            background-color: {COLOR_SURFACE};
+            border: 1px solid {COLOR_BORDER_SUBTLE};
+            border-radius: 6px;
+        """)
+        layout.addWidget(self.lbl_image)
+
+        # Label do Título da Obra
+        self.lbl_title = QLabel(self)
+        self.lbl_title.setAlignment(Qt.AlignCenter)
+        self.lbl_title.setWordWrap(True)
+        self.lbl_title.setFixedWidth(260)
+        self.lbl_title.setStyleSheet(f"""
+            color: {COLOR_TEXT_PRIMARY};
+            font-size: 12px;
+            font-weight: 700;
+            padding: 2px;
+        """)
+        layout.addWidget(self.lbl_title)
+
+        # Label da Fonte
+        self.lbl_source = QLabel(self)
+        self.lbl_source.setAlignment(Qt.AlignCenter)
+        self.lbl_source.setStyleSheet(f"""
+            color: {COLOR_ACCENT};
+            font-size: 10px;
+            font-weight: 600;
+        """)
+        layout.addWidget(self.lbl_source)
+
+        try:
+            shadow = QGraphicsDropShadowEffect(self)
+            shadow.setBlurRadius(24)
+            shadow.setColor(QColor(0, 0, 0, 200))
+            shadow.setOffset(0, 6)
+            self.setGraphicsEffect(shadow)
+        except Exception:
+            pass
+
+    def show_preview(self, global_pos: QPoint, pixmap: Optional[QPixmap], title: str, source_name: str = ""):
+        """Renderiza a capa em tamanho ampliado garantindo visibilidade total na tela."""
+        if pixmap and not pixmap.isNull():
+            scaled = pixmap.scaled(260, 370, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+            self.lbl_image.setPixmap(scaled)
+            self.lbl_image.setText("")
+        else:
+            self.lbl_image.setPixmap(QPixmap())
+            self.lbl_image.setText("📖 Sem Capa")
+            self.lbl_image.setStyleSheet(f"color: {COLOR_TEXT_SECONDARY}; font-size: 14px; background-color: {COLOR_SURFACE}; border-radius: 6px;")
+
+        self.lbl_title.setText(title)
+        if source_name:
+            self.lbl_source.setText(f"FONTE: {source_name.upper()}")
+            self.lbl_source.show()
+        else:
+            self.lbl_source.hide()
+
+        self.adjustSize()
+
+        # Posicionamento inteligente ao lado do item da tabela
+        target_x = global_pos.x() + 15
+        target_y = global_pos.y() - 30
+
+        # Previne que o popup ultrapasse as bordas da tela
+        screen = QApplication.primaryScreen()
+        if screen:
+            geo = screen.availableGeometry()
+            if target_x + self.width() > geo.right() - 10:
+                target_x = max(geo.left() + 10, global_pos.x() - self.width() - 85)
+            if target_y + self.height() > geo.bottom() - 10:
+                target_y = max(geo.top() + 10, geo.bottom() - self.height() - 10)
+            if target_y < geo.top() + 10:
+                target_y = geo.top() + 10
+
+        self.move(target_x, target_y)
+        self.show()
+        self.raise_()
+
+    def hide_preview(self):
+        """Oculta o pop-up instantaneamente."""
+        self.hide()
+
+
+class HoverableCoverLabel(QLabel):
+    """
+    QLabel que exibe a miniatura na tabela e aciona o pop-up ampliado
+    quando o usuário aproxima o cursor do mouse (hover).
+    """
+    def __init__(self, title: str, source_name: str, popup: CoverPreviewPopup, parent=None):
+        super().__init__(parent)
+        self.title = title
+        self.source_name = source_name
+        self.popup = popup
+        self.cover_pixmap: Optional[QPixmap] = None
+        self.setMouseTracking(True)
+
+    def set_cover_pixmap(self, pix: QPixmap):
+        self.cover_pixmap = pix
+        # Exibe miniatura ampliada na tabela (65x90) com suavização
+        self.setPixmap(pix.scaled(65, 90, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+
+    def enterEvent(self, event):
+        if self.popup:
+            global_pos = self.mapToGlobal(QPoint(self.width(), 0))
+            self.popup.show_preview(global_pos, self.cover_pixmap, self.title, self.source_name)
+        super().enterEvent(event)
+
+    def leaveEvent(self, event):
+        if self.popup:
+            self.popup.hide_preview()
+        super().leaveEvent(event)
+
+    def hideEvent(self, event):
+        if self.popup:
+            self.popup.hide_preview()
+        super().hideEvent(event)
+
+
+# ----------------------------------------------------------------------
 # Janela Principal com Design System Oficial (PyQt5)
 # ----------------------------------------------------------------------
 class MainWindow(QMainWindow):
@@ -359,7 +598,8 @@ class MainWindow(QMainWindow):
         self.resize(1160, 840)
 
         # Ícone da aplicação
-        logo_path = Path(__file__).resolve().parent / "assets" / "logo.png"
+        self.base_asset_dir = Path(sys._MEIPASS) if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS") else Path(__file__).resolve().parent
+        logo_path = self.base_asset_dir / "assets" / "logo.png"
         if logo_path.is_file():
             self.setWindowIcon(QIcon(str(logo_path)))
 
@@ -369,6 +609,15 @@ class MainWindow(QMainWindow):
         self.analysis_worker: Optional[MangaAnalysisWorker] = None
         self.lang_worker: Optional[LanguageSwitchWorker] = None
         self.current_analysis: Optional[dict] = None
+
+        # Atributos da Aba Explorar Fontes
+        self.catalog_worker: Optional[MangaCatalogWorker] = None
+        self.cover_worker: Optional[CoverThumbnailWorker] = None
+        self.current_explore_source: Optional[KeiyoushiSource] = None
+        self.current_explore_page: int = 1
+        self.all_explore_sources: List[KeiyoushiSource] = []
+        self.filtered_explore_sources: List[KeiyoushiSource] = []
+        self.current_manga_items: List[dict] = []
 
         saved_tasks = StateManager.load_queue()
         if saved_tasks:
@@ -380,6 +629,7 @@ class MainWindow(QMainWindow):
         self._init_ui()
         self.apply_theme()
         self._refresh_table()
+        self._populate_sources_list()
 
     def _init_ui(self):
         central = QWidget()
@@ -399,7 +649,7 @@ class MainWindow(QMainWindow):
         header_layout.setSpacing(12)
 
         lbl_logo_icon = QLabel()
-        logo_path = Path(__file__).resolve().parent / "assets" / "logo.png"
+        logo_path = self.base_asset_dir / "assets" / "logo.png"
         if logo_path.is_file():
             pix = QPixmap(str(logo_path))
             if not pix.isNull():
@@ -429,6 +679,19 @@ class MainWindow(QMainWindow):
         self.shortcut_f1.activated.connect(self.open_about_dialog)
 
         main_layout.addWidget(header_frame)
+
+        # --------------------------------------------------------------
+        # Abas Principais da Aplicação (Fila de Downloads e Explorar Fontes)
+        # --------------------------------------------------------------
+        self.tabs = QTabWidget()
+        self.tabs.setObjectName("MainTabs")
+        self.tabs.currentChanged.connect(lambda: getattr(self, 'cover_popup', None) and self.cover_popup.hide_preview())
+
+        # Aba 1: Fila de Downloads
+        self.tab_queue = QWidget()
+        queue_layout = QVBoxLayout(self.tab_queue)
+        queue_layout.setContentsMargins(0, 8, 0, 0)
+        queue_layout.setSpacing(10)
 
         # --------------------------------------------------------------
         # 2. Painel de Entrada de Links e Análise Prévia
@@ -475,8 +738,15 @@ class MainWindow(QMainWindow):
         self.btn_load_txt.setMinimumHeight(24)
         self.btn_load_txt.clicked.connect(self.import_txt_file)
 
+        self.btn_catalog = QPushButton("📚 Catálogo (2200+)")
+        self.btn_catalog.setObjectName("SecondaryBtn")
+        self.btn_catalog.setMinimumHeight(24)
+        self.btn_catalog.setToolTip("Navega e pesquisa nas mais de 2.200 fontes do catálogo Keiyoushi.")
+        self.btn_catalog.clicked.connect(self.switch_to_explore_tab)
+
         btn_sub_box.addWidget(self.btn_batch_add)
         btn_sub_box.addWidget(self.btn_load_txt)
+        btn_sub_box.addWidget(self.btn_catalog)
 
         btn_box.addWidget(self.btn_analyze_link)
         btn_box.addLayout(btn_sub_box)
@@ -619,7 +889,7 @@ class MainWindow(QMainWindow):
         card_layout.addWidget(self.panel_analyzed)
 
         top_layout.addWidget(self.card_analysis)
-        main_layout.addWidget(self.top_group)
+        queue_layout.addWidget(self.top_group)
 
         # --------------------------------------------------------------
         # 3. Barra de Controle da Fila de Downloads
@@ -665,7 +935,7 @@ class MainWindow(QMainWindow):
         self.btn_open_folder.clicked.connect(self.open_output_folder)
         toolbar_layout.addWidget(self.btn_open_folder, 1)
 
-        main_layout.addLayout(toolbar_layout)
+        queue_layout.addLayout(toolbar_layout)
 
         # --------------------------------------------------------------
         # 4. Tabela de Tarefas da Fila (Queue Table)
@@ -706,7 +976,7 @@ class MainWindow(QMainWindow):
         self.shortcut_del.activated.connect(self.delete_selected_tasks)
 
         table_layout.addWidget(self.table)
-        main_layout.addWidget(table_group, 4)
+        queue_layout.addWidget(table_group, 4)
 
         # --------------------------------------------------------------
         # 5. Dashboard de Estatísticas Técnicas em Tempo Real
@@ -741,14 +1011,14 @@ class MainWindow(QMainWindow):
         dash_layout.addStretch()
         dash_layout.addWidget(self.lbl_current_action)
 
-        main_layout.addWidget(dash_frame)
+        queue_layout.addWidget(dash_frame)
 
         # Barra de Progresso Geral
         self.overall_progress = QProgressBar()
         self.overall_progress.setFixedHeight(22)
         self.overall_progress.setValue(0)
         self.overall_progress.setFormat("Progresso da Fila: %p%")
-        main_layout.addWidget(self.overall_progress)
+        queue_layout.addWidget(self.overall_progress)
 
         # --------------------------------------------------------------
         # 6. Terminal Técnico de Logs
@@ -762,7 +1032,446 @@ class MainWindow(QMainWindow):
         self.log_box.setReadOnly(True)
         self.log_box.setMinimumHeight(80)
         log_layout.addWidget(self.log_box)
-        main_layout.addWidget(log_group, 1)
+        queue_layout.addWidget(log_group, 1)
+
+        # --------------------------------------------------------------
+        # Aba 2: Explorar Fontes (2.200+ Sites)
+        # --------------------------------------------------------------
+        self.tab_explore = QWidget()
+        self._init_explore_tab()
+
+        self.tabs.addTab(self.tab_queue, "📥 Fila de Downloads")
+        self.tabs.addTab(self.tab_explore, "🌐 Explorar Fontes")
+        main_layout.addWidget(self.tabs)
+
+    def switch_to_explore_tab(self):
+        """Alterna a visualização diretamente para a aba 'Explorar Fontes'."""
+        self.tabs.setCurrentIndex(1)
+
+    def _init_explore_tab(self):
+        """Inicializa a aba '🌐 Explorar Fontes' com divisão entre lista de fontes e vitrine de mangás."""
+        explore_layout = QVBoxLayout(self.tab_explore)
+        explore_layout.setContentsMargins(6, 8, 6, 6)
+        explore_layout.setSpacing(8)
+
+        splitter = QSplitter(Qt.Horizontal)
+        splitter.setHandleWidth(4)
+
+        # ==============================================================
+        # 1. PAINEL ESQUERDO: Catálogo de 2.200+ Fontes
+        # ==============================================================
+        left_box = QGroupBox("1. Selecione uma Fonte (2.200+)")
+        left_layout = QVBoxLayout(left_box)
+        left_layout.setContentsMargins(8, 12, 8, 8)
+        left_layout.setSpacing(8)
+
+        # Filtro de Busca de Fonte por Texto
+        self.txt_source_filter = QLineEdit()
+        self.txt_source_filter.setPlaceholderText("🔍 Buscar fonte por nome ou domínio...")
+        self.txt_source_filter.textChanged.connect(self._filter_sources)
+        left_layout.addWidget(self.txt_source_filter)
+
+        # Filtro por Idioma
+        lang_row = QHBoxLayout()
+        lang_row.setSpacing(6)
+        lbl_lang = QLabel("Idioma:")
+        lbl_lang.setStyleSheet(f"color: {COLOR_TEXT_SECONDARY}; font-size: 11px;")
+        self.combo_source_lang = QComboBox()
+        self.combo_source_lang.addItem("🌐 Português (pt-br)", "pt-br")
+        self.combo_source_lang.addItem("🌐 Todos os Idiomas (2200+)", "all")
+        self.combo_source_lang.addItem("🇺🇸 English (en)", "en")
+        self.combo_source_lang.addItem("🇪🇸 Español (es)", "es")
+        self.combo_source_lang.addItem("🇯🇵 日本語 (ja)", "ja")
+        self.combo_source_lang.addItem("🇫🇷 Français (fr)", "fr")
+        self.combo_source_lang.addItem("🇩🇪 Deutsch (de)", "de")
+        self.combo_source_lang.addItem("🇮🇹 Italiano (it)", "it")
+        self.combo_source_lang.addItem("🇷🇺 Русский (ru)", "ru")
+        self.combo_source_lang.currentIndexChanged.connect(self._filter_sources)
+
+        lang_row.addWidget(lbl_lang)
+        lang_row.addWidget(self.combo_source_lang, 1)
+        left_layout.addLayout(lang_row)
+
+        # Tabela de Fontes
+        self.table_sources = QTableWidget()
+        self.table_sources.setColumnCount(3)
+        self.table_sources.setHorizontalHeaderLabels(["Fonte / Scan", "Lang", "Domínio"])
+        self.table_sources.verticalHeader().setVisible(False)
+        self.table_sources.verticalHeader().setDefaultSectionSize(28)
+        self.table_sources.setSelectionBehavior(QTableWidget.SelectRows)
+        self.table_sources.setSelectionMode(QTableWidget.SingleSelection)
+        self.table_sources.setEditTriggers(QTableWidget.NoEditTriggers)
+        self.table_sources.horizontalHeader().setSectionResizeMode(0, QHeaderView.Interactive)
+        self.table_sources.horizontalHeader().setSectionResizeMode(1, QHeaderView.Fixed)
+        self.table_sources.horizontalHeader().setSectionResizeMode(2, QHeaderView.Stretch)
+        self.table_sources.setColumnWidth(0, 140)
+        self.table_sources.setColumnWidth(1, 55)
+        self.table_sources.itemSelectionChanged.connect(self._on_source_selection_changed)
+        left_layout.addWidget(self.table_sources)
+
+        # Rodapé do painel de fontes com contador
+        self.lbl_sources_count = QLabel("Carregando fontes...")
+        self.lbl_sources_count.setStyleSheet(f"color: {COLOR_TEXT_SECONDARY}; font-size: 11px;")
+        left_layout.addWidget(self.lbl_sources_count)
+
+        splitter.addWidget(left_box)
+
+        # ==============================================================
+        # 2. PAINEL DIREITO: Vitrine de Mangás do Site Selecionado
+        # ==============================================================
+        right_box = QGroupBox("2. Obras Disponíveis na Fonte")
+        right_layout = QVBoxLayout(right_box)
+        right_layout.setContentsMargins(8, 12, 8, 8)
+        right_layout.setSpacing(8)
+
+        # Barra Superior da Vitrine: Título da Fonte, Filtro Rápido e Botão Atualizar
+        top_bar = QHBoxLayout()
+        top_bar.setSpacing(8)
+
+        self.lbl_current_source_info = QLabel("Selecione uma fonte à esquerda para carregar as obras")
+        self.lbl_current_source_info.setStyleSheet(f"color: {COLOR_ACCENT}; font-size: 13px; font-weight: bold;")
+        top_bar.addWidget(self.lbl_current_source_info, 1)
+
+        self.txt_manga_filter = QLineEdit()
+        self.txt_manga_filter.setPlaceholderText("🔍 Filtrar obras exibidas...")
+        self.txt_manga_filter.setMaximumWidth(200)
+        self.txt_manga_filter.textChanged.connect(self._filter_mangas_in_view)
+        top_bar.addWidget(self.txt_manga_filter)
+
+        self.btn_refresh_catalog = QPushButton("🔄 Atualizar")
+        self.btn_refresh_catalog.setObjectName("SecondaryBtn")
+        self.btn_refresh_catalog.setToolTip("Recarrega a página atual ignorando o cache local")
+        self.btn_refresh_catalog.clicked.connect(lambda: self._load_current_page(force_refresh=True))
+        top_bar.addWidget(self.btn_refresh_catalog)
+
+        right_layout.addLayout(top_bar)
+
+        # Pop-up de capa ampliada ao passar o mouse
+        self.cover_popup = CoverPreviewPopup(self)
+
+        # Tabela de Mangás da Fonte
+        self.table_mangas = QTableWidget()
+        self.table_mangas.setColumnCount(5)
+        self.table_mangas.setHorizontalHeaderLabels(["Capa", "Título da Obra", "Capítulos", "Disponibilidade", "Ação"])
+        self.table_mangas.verticalHeader().setVisible(False)
+        self.table_mangas.verticalHeader().setDefaultSectionSize(98)
+        self.table_mangas.setSelectionBehavior(QTableWidget.SelectRows)
+        self.table_mangas.setSelectionMode(QTableWidget.SingleSelection)
+        self.table_mangas.setEditTriggers(QTableWidget.NoEditTriggers)
+        self.table_mangas.cellDoubleClicked.connect(self._on_manga_cell_double_clicked)
+        self.table_mangas.verticalScrollBar().valueChanged.connect(self.cover_popup.hide_preview)
+
+        header_m = self.table_mangas.horizontalHeader()
+        header_m.setSectionResizeMode(0, QHeaderView.Fixed)
+        header_m.setSectionResizeMode(1, QHeaderView.Stretch)
+        header_m.setSectionResizeMode(2, QHeaderView.Fixed)
+        header_m.setSectionResizeMode(3, QHeaderView.Fixed)
+        header_m.setSectionResizeMode(4, QHeaderView.Fixed)
+
+        self.table_mangas.setColumnWidth(0, 80)
+        self.table_mangas.setColumnWidth(2, 120)
+        self.table_mangas.setColumnWidth(3, 110)
+        self.table_mangas.setColumnWidth(4, 110)
+
+        right_layout.addWidget(self.table_mangas)
+
+        # Barra Inferior: Paginação e Status
+        bottom_bar = QHBoxLayout()
+        bottom_bar.setSpacing(10)
+
+        self.btn_prev_page = QPushButton("⬅️ Anterior")
+        self.btn_prev_page.setObjectName("SecondaryBtn")
+        self.btn_prev_page.setEnabled(False)
+        self.btn_prev_page.clicked.connect(self._prev_page)
+        bottom_bar.addWidget(self.btn_prev_page)
+
+        self.lbl_page_info = QLabel("Página 1")
+        self.lbl_page_info.setStyleSheet(f"color: {COLOR_TEXT_PRIMARY}; font-weight: bold; font-size: 12px;")
+        bottom_bar.addWidget(self.lbl_page_info)
+
+        self.btn_next_page = QPushButton("Próxima ➡️")
+        self.btn_next_page.setObjectName("SecondaryBtn")
+        self.btn_next_page.setEnabled(False)
+        self.btn_next_page.clicked.connect(self._next_page)
+        bottom_bar.addWidget(self.btn_next_page)
+
+        bottom_bar.addStretch()
+
+        self.lbl_catalog_status = QLabel("Nenhuma fonte carregada.")
+        self.lbl_catalog_status.setStyleSheet(f"color: {COLOR_TEXT_SECONDARY}; font-size: 11px; font-style: italic;")
+        bottom_bar.addWidget(self.lbl_catalog_status)
+
+        right_layout.addLayout(bottom_bar)
+
+        splitter.addWidget(right_box)
+        splitter.setStretchFactor(0, 1)
+        splitter.setStretchFactor(1, 2)
+        splitter.setSizes([330, 770])
+
+        explore_layout.addWidget(splitter)
+
+    def _populate_sources_list(self):
+        """Carrega e popula a lista de fontes do catálogo Keiyoushi."""
+        if not catalog.is_loaded:
+            catalog.load()
+
+        self.all_explore_sources = list(catalog.sources)
+        self._filter_sources()
+
+    def _filter_sources(self):
+        """Filtra as fontes exibidas por texto de busca e idioma."""
+        query = self.txt_source_filter.text().strip().lower()
+        selected_lang = self.combo_source_lang.currentData()
+
+        filtered = []
+        for s in self.all_explore_sources:
+            if selected_lang != "all" and s.lang.lower() != selected_lang:
+                continue
+            if query:
+                domain = catalog.extract_domain(s.base_url).lower()
+                name = s.name.lower()
+                if query not in name and query not in domain:
+                    continue
+            filtered.append(s)
+
+        self.filtered_explore_sources = filtered
+        self.table_sources.blockSignals(True)
+        self.table_sources.setRowCount(len(filtered))
+
+        for row, s in enumerate(filtered):
+            item_name = QTableWidgetItem(s.name)
+            item_name.setToolTip(f"{s.name}\n{s.base_url}")
+            item_lang = QTableWidgetItem(s.lang.upper())
+            item_lang.setTextAlignment(Qt.AlignCenter)
+            domain = catalog.extract_domain(s.base_url)
+            item_domain = QTableWidgetItem(domain)
+            item_domain.setToolTip(s.base_url)
+
+            self.table_sources.setItem(row, 0, item_name)
+            self.table_sources.setItem(row, 1, item_lang)
+            self.table_sources.setItem(row, 2, item_domain)
+
+        self.table_sources.blockSignals(False)
+        self.lbl_sources_count.setText(f"{len(filtered)} fonte(s) encontrada(s).")
+
+    def _on_source_selection_changed(self):
+        """Disparado quando o usuário clica em uma fonte na lista."""
+        selected_rows = self.table_sources.selectionModel().selectedRows()
+        if not selected_rows:
+            return
+        row = selected_rows[0].row()
+        if 0 <= row < len(self.filtered_explore_sources):
+            source = self.filtered_explore_sources[row]
+            self.current_explore_source = source
+            self.current_explore_page = 1
+            domain = catalog.extract_domain(source.base_url)
+            self.lbl_current_source_info.setText(f"📖 {source.name} [{source.lang.upper()}] — {domain}")
+            self._load_current_page(force_refresh=False)
+
+    def _load_current_page(self, force_refresh=False):
+        """Inicia a busca assíncrona das obras da fonte selecionada na página indicada."""
+        if hasattr(self, 'cover_popup'):
+            self.cover_popup.hide_preview()
+
+        if not self.current_explore_source:
+            return
+
+        if self.cover_worker and self.cover_worker.isRunning():
+            self.cover_worker.cancel()
+            self.cover_worker.wait(500)
+
+        source = self.current_explore_source
+        page = self.current_explore_page
+        self.lbl_page_info.setText(f"Página {page}")
+        self.btn_prev_page.setEnabled(page > 1)
+        self.btn_next_page.setEnabled(False)
+        self.btn_refresh_catalog.setEnabled(False)
+        self.lbl_catalog_status.setText(f"🔍 Conectando a '{source.name}' e listando obras da página {page}...")
+        self.lbl_catalog_status.setStyleSheet(f"color: {COLOR_ACCENT}; font-size: 11px; font-style: italic;")
+
+        self.table_mangas.setRowCount(0)
+
+        self.catalog_worker = MangaCatalogWorker(source, page=page, force_refresh=force_refresh, parent=self)
+        self.catalog_worker.finished_signal.connect(self._on_catalog_loaded)
+        self.catalog_worker.error_signal.connect(self._on_catalog_error)
+        self.catalog_worker.status_signal.connect(lambda msg: self.lbl_catalog_status.setText(msg))
+        self.catalog_worker.start()
+
+    def _on_catalog_loaded(self, items: list, page: int):
+        """Atualiza a tabela de mangás com os dados obtidos da fonte."""
+        self.btn_refresh_catalog.setEnabled(True)
+        self.current_manga_items = items
+        self.table_mangas.setRowCount(len(items))
+
+        if not items:
+            self.lbl_catalog_status.setText(f"Nenhum mangá encontrado na página {page} desta fonte.")
+            self.lbl_catalog_status.setStyleSheet(f"color: {COLOR_WARNING}; font-size: 11px;")
+            self.btn_next_page.setEnabled(False)
+            return
+
+        self.btn_next_page.setEnabled(len(items) >= 15)
+        self.lbl_catalog_status.setText(f"✓ {len(items)} obras carregadas com sucesso.")
+        self.lbl_catalog_status.setStyleSheet(f"color: {COLOR_SUCCESS}; font-size: 11px;")
+
+        covers_to_fetch = []
+
+        for row, item in enumerate(items):
+            # Coluna 0: Miniatura de Capa (ampliada 65x90 e interativa com pop-up ampliado no hover)
+            lbl_cover = HoverableCoverLabel(
+                title=item["title"],
+                source_name=item.get("source_name", ""),
+                popup=self.cover_popup,
+                parent=self.table_mangas
+            )
+            lbl_cover.setFixedSize(65, 90)
+            lbl_cover.setAlignment(Qt.AlignCenter)
+            lbl_cover.setStyleSheet(f"background-color: {COLOR_SURFACE}; border: 1px solid {COLOR_BORDER_SUBTLE}; border-radius: 4px;")
+            lbl_cover.setText("📖")
+            self.table_mangas.setCellWidget(row, 0, lbl_cover)
+
+            # Coluna 1: Título da Obra
+            item_title = QTableWidgetItem(item["title"])
+            item_title.setToolTip(f"{item['title']}\n{item['url']}")
+            self.table_mangas.setItem(row, 1, item_title)
+
+            # Coluna 2: Total de Capítulos
+            ch_info = item.get("chapter_info") or "Disponível"
+            item_chaps = QTableWidgetItem(ch_info)
+            item_chaps.setTextAlignment(Qt.AlignCenter)
+            item_chaps.setToolTip(ch_info)
+            self.table_mangas.setItem(row, 2, item_chaps)
+
+            # Coluna 3: Disponibilidade
+            lbl_status = QLabel("🟢 Online")
+            lbl_status.setAlignment(Qt.AlignCenter)
+            lbl_status.setStyleSheet("""
+                color: #A3E635;
+                background-color: rgba(163, 230, 53, 0.12);
+                border: 1px solid rgba(163, 230, 53, 0.3);
+                border-radius: 4px;
+                padding: 3px 6px;
+                font-size: 11px;
+                font-weight: 600;
+            """)
+            self.table_mangas.setCellWidget(row, 3, lbl_status)
+
+            # Coluna 4: Botão de Download
+            btn_download = QPushButton("⬇️ Baixar")
+            btn_download.setObjectName("PrimaryBtn")
+            btn_download.setFixedHeight(28)
+            btn_download.setToolTip("Selecionar capítulos e enviar para a fila de downloads")
+            btn_download.clicked.connect(lambda checked, m=item: self._on_download_manga_from_catalog(m))
+            self.table_mangas.setCellWidget(row, 4, btn_download)
+
+            if item.get("cover_url"):
+                covers_to_fetch.append((row, item["cover_url"]))
+
+        # Iniciar carregamento assíncrono das capas
+        if covers_to_fetch and self.current_explore_source:
+            headers = {"Referer": self.current_explore_source.base_url}
+            self.cover_worker = CoverThumbnailWorker(covers_to_fetch, headers=headers, parent=self)
+            self.cover_worker.cover_loaded.connect(self._on_cover_thumbnail_loaded)
+            self.cover_worker.start()
+
+    def _on_catalog_error(self, err_msg: str):
+        """Trata erros no carregamento do catálogo."""
+        self.btn_refresh_catalog.setEnabled(True)
+        self.lbl_catalog_status.setText(f"❌ Falha ao carregar catálogo: {err_msg}")
+        self.lbl_catalog_status.setStyleSheet(f"color: {COLOR_ERROR}; font-size: 11px; font-weight: 500;")
+        self.log(f"[CATÁLOGO] Erro ao carregar: {err_msg}")
+
+    def _on_cover_thumbnail_loaded(self, row_idx: int, img_bytes: bytes):
+        """Aplica a miniatura da capa na célula da tabela assim que o download terminar."""
+        if row_idx < self.table_mangas.rowCount():
+            pix = QPixmap()
+            if pix.loadFromData(img_bytes):
+                lbl = self.table_mangas.cellWidget(row_idx, 0)
+                if isinstance(lbl, HoverableCoverLabel):
+                    lbl.set_cover_pixmap(pix)
+                elif isinstance(lbl, QLabel):
+                    lbl.setPixmap(pix.scaled(65, 90, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+
+    def _prev_page(self):
+        if hasattr(self, 'cover_popup'):
+            self.cover_popup.hide_preview()
+        if self.current_explore_page > 1:
+            self.current_explore_page -= 1
+            self._load_current_page(force_refresh=False)
+
+    def _next_page(self):
+        if hasattr(self, 'cover_popup'):
+            self.cover_popup.hide_preview()
+        self.current_explore_page += 1
+        self._load_current_page(force_refresh=False)
+
+    def _filter_mangas_in_view(self, text: str):
+        """Filtra instantaneamente os mangás exibidos na tabela da fonte atual."""
+        if hasattr(self, 'cover_popup'):
+            self.cover_popup.hide_preview()
+        filter_txt = text.strip().lower()
+        for row in range(self.table_mangas.rowCount()):
+            title_item = self.table_mangas.item(row, 1)
+            if title_item:
+                match = filter_txt in title_item.text().lower()
+                self.table_mangas.setRowHidden(row, not match)
+
+    def _on_manga_cell_double_clicked(self, row: int, col: int):
+        """Permite dar duplo clique em um mangá para abrir o diálogo de download."""
+        if 0 <= row < len(self.current_manga_items):
+            self._on_download_manga_from_catalog(self.current_manga_items[row])
+
+    def _on_download_manga_from_catalog(self, item: dict):
+        """Abre o diálogo de escolha de capítulos e enfileira a obra com confirmação oficial."""
+        title = item.get("title", "Obra")
+        url = item.get("url", "")
+        source_name = item.get("source_name", "")
+        default_outdir = self.txt_outdir.text().strip() or "download"
+
+        dlg = ChapterDownloadDialog(
+            manga_title=title,
+            manga_url=url,
+            source_name=source_name,
+            default_outdir=default_outdir,
+            parent=self
+        )
+        if dlg.exec_() == QDialog.Accepted and dlg.result_config:
+            cfg = dlg.result_config
+            task_id = f"{time.time()}_{len(self.tasks)}"
+            provider_obj = ProviderRegistry.get_provider_for_url(url)
+            provider_name = provider_obj.name if provider_obj else "keiyoushi"
+            lang_code = item.get("lang") or "pt-br"
+
+            task = QueueTask(
+                id=task_id,
+                url=url,
+                title=title,
+                cover_url=item.get("cover_url", ""),
+                provider=provider_name,
+                lang_code=lang_code,
+                available_langs=[lang_code],
+                chapter_mode=cfg["chapter_mode"],
+                chapter_mode_value=cfg["chapter_mode_value"],
+                all_chapters=[],
+                selected_chapters=[],
+                outdir=cfg["outdir"],
+                cbz=cfg["cbz"],
+                datasaver=False,
+                estimated_size_mb=0.0,
+                estimated_seconds=0.0,
+                status=TaskStatus.PENDING
+            )
+            self.tasks.append(task)
+            StateManager.save_queue(self.tasks)
+            self._refresh_table()
+
+            self.log(f"[FILA] Mangás foram pra fila! Obra: '{title}' (Capítulos: {cfg['chapter_mode'].value}).")
+
+            # Confirmação exata requerida pelo usuário!
+            QMessageBox.information(
+                self,
+                "Sucesso",
+                "Mangás foram pra fila!"
+            )
 
     def apply_theme(self):
         """Aplica a folha de estilos do Design System oficial."""
@@ -843,6 +1552,22 @@ class MainWindow(QMainWindow):
                 self.log(f"[IMPORT] Arquivo carregado: {filepath}")
             except Exception as e:
                 QMessageBox.critical(self, "Erro", f"Falha ao ler arquivo: {e}")
+
+    def open_keiyoushi_catalog(self):
+        """Abre a janela de pesquisa e exploração das 2.200+ fontes do index.pb."""
+        try:
+            from keiyoushi_dialog import KeiyoushiCatalogDialog
+            dialog = KeiyoushiCatalogDialog(self)
+            dialog.url_selected_signal.connect(self._on_catalog_url_selected)
+            dialog.exec_()
+        except Exception as e:
+            QMessageBox.critical(self, "Erro", f"Falha ao abrir catálogo: {e}")
+
+    def _on_catalog_url_selected(self, base_url: str):
+        self.txt_urls.setPlainText(base_url)
+        self.log(f"[CATÁLOGO] Fonte selecionada: {base_url}")
+        self.lbl_card_status.setVisible(True)
+        self.lbl_card_status.setText(f"💡 Fonte carregada: {base_url}. Complete com a rota do mangá e clique em 'Analisar Link'.")
 
     def start_analysis(self):
         """Inicia a análise em background da URL informada."""
@@ -1136,7 +1861,12 @@ class MainWindow(QMainWindow):
             self.table.setItem(row, 1, item_title)
 
             # 2: Provedor
-            prov_name = ProviderRegistry.get_provider(task.provider).display_name
+            if task.provider == "keiyoushi":
+                from keiyoushi_catalog import catalog
+                src = catalog.find_source_by_url(task.url)
+                prov_name = f"{src.name} ({src.lang})" if src else "Keiyoushi"
+            else:
+                prov_name = ProviderRegistry.get_provider(task.provider).display_name
             item_prov = QTableWidgetItem(prov_name)
             item_prov.setTextAlignment(Qt.AlignCenter)
             self.table.setItem(row, 2, item_prov)
@@ -1425,6 +2155,12 @@ class MainWindow(QMainWindow):
         self.log(f"[LIMPEZA] Fila completamente esvaziada ({count} obras removidas).")
 
     def closeEvent(self, event):
+        if self.cover_worker and self.cover_worker.isRunning():
+            self.cover_worker.cancel()
+            self.cover_worker.wait(500)
+        if self.catalog_worker and self.catalog_worker.isRunning():
+            self.catalog_worker.wait(500)
+
         if self.worker and self.worker.isRunning():
             reply = QMessageBox.question(
                 self,
@@ -1440,11 +2176,21 @@ class MainWindow(QMainWindow):
                     if t.status in (TaskStatus.DOWNLOADING, TaskStatus.ANALYZING):
                         t.status = TaskStatus.STOPPED
                 StateManager.save_queue(self.tasks)
+                try:
+                    for p in ProviderRegistry.get_providers():
+                        p.close_session()
+                except Exception:
+                    pass
                 event.accept()
             else:
                 event.ignore()
         else:
             StateManager.save_queue(self.tasks)
+            try:
+                for p in ProviderRegistry.get_providers():
+                    p.close_session()
+            except Exception:
+                pass
             event.accept()
 
 

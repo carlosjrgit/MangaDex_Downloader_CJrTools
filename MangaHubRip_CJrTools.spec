@@ -5,7 +5,10 @@ a = Analysis(
     ['mangadex_gui.py'],
     pathex=[],
     binaries=[],
-    datas=[('assets', 'assets')],
+    datas=[
+        ('assets', 'assets'),
+        ('index.pb', '.')
+    ],
     hiddenimports=[
         'providers',
         'manga_core',
@@ -13,6 +16,12 @@ a = Analysis(
         'about_dialog',
         'icons',
         'styles',
+        'keiyoushi_catalog',
+        'source_catalog_fetcher',
+        'chapter_download_dialog',
+        'keiyoushi_dialog',
+        'playwright',
+        'playwright.sync_api',
         'bs4',
         'tqdm',
         'urllib3',
@@ -33,7 +42,7 @@ exe = EXE(
     a.binaries,
     a.datas,
     [],
-    name='MangaDex_Downloader_CJrTools',
+    name='MangaHubRip_CJrTools',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,

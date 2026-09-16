@@ -1,6 +1,6 @@
-# Guia de Contribuição — MangaDex_Downloader_CJrTools
+# Guia de Contribuição — MangaHubRip_CJrTools
 
-Agradecemos o seu interesse em contribuir para o **MangaDex_Downloader_CJrTools**!
+Agradecemos o seu interesse em contribuir para o **MangaHubRip_CJrTools**!
 Este documento detalha o fluxo de desenvolvimento local, padrões de qualidade e diretrizes de segurança.
 
 ---

@@ -529,4 +529,50 @@ QLabel#ChapsBadge {{
     font-weight: 600;
     font-size: 13px;
 }}
+
+/* Abas Principais (QTabWidget & QTabBar) */
+QTabWidget::pane {{
+    background-color: {COLOR_BACKGROUND};
+    border-top: 1px solid {COLOR_BORDER_SUBTLE};
+    border-left: none;
+    border-right: none;
+    border-bottom: none;
+    top: -1px;
+}}
+
+QTabBar::tab {{
+    background-color: {COLOR_SURFACE};
+    color: {COLOR_TEXT_SECONDARY};
+    padding: 9px 22px;
+    font-size: 13px;
+    font-weight: 500;
+    border-top-left-radius: {RADIUS_DEFAULT};
+    border-top-right-radius: {RADIUS_DEFAULT};
+    border: 1px solid {COLOR_BORDER_SUBTLE};
+    border-bottom: none;
+    margin-right: 4px;
+}}
+
+QTabBar::tab:hover {{
+    background-color: {COLOR_SURFACE_ACTIVE};
+    color: {COLOR_TEXT_PRIMARY};
+}}
+
+QTabBar::tab:selected {{
+    background-color: {COLOR_SURFACE_ELEVATED};
+    color: {COLOR_ACCENT};
+    font-weight: 600;
+    border-top: 2px solid {COLOR_ACCENT};
+    border-left: 1px solid {COLOR_BORDER_STRONG};
+    border-right: 1px solid {COLOR_BORDER_STRONG};
+}}
+
+/* Divisores de Painel (QSplitter) */
+QSplitter::handle {{
+    background-color: {COLOR_BORDER_SUBTLE};
+}}
+
+QSplitter::handle:hover {{
+    background-color: {COLOR_ACCENT};
+}}
 """

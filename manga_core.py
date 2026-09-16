@@ -683,7 +683,7 @@ class DownloadEngine:
             logger.error("URL de imagem malformada rejeitada: %s", url)
             return False
 
-        req_headers = headers or session.headers
+        req_headers = dict(headers) if headers else dict(session.headers)
 
         for attempt in range(3):
             if self.controller.check_pause_and_stop():
@@ -695,6 +695,16 @@ class DownloadEngine:
                         f.write(r.content)
                     self.record_bytes(len(r.content))
                     return True
+
+                # Resiliência a 401/403 (proteções anti-hotlink em CDNs)
+                if r.status_code in (401, 403) and attempt == 0:
+                    current_ref = req_headers.get("Referer", "")
+                    if current_ref:
+                        p_ref = urlparse(current_ref)
+                        req_headers["Referer"] = f"{p_ref.scheme}://{p_ref.netloc}/"
+                elif r.status_code in (401, 403) and attempt == 1:
+                    req_headers.pop("Referer", None)
+
                 time.sleep(1 * (attempt + 1))
             except Exception:
                 time.sleep(1 * (attempt + 1))
@@ -757,6 +767,7 @@ class DownloadEngine:
         total_pages = len(images)
         completed_pages = 0
 
+        chap_url = chapter.get("url") or chapter.get("id") or ""
         with ThreadPoolExecutor(max_workers=workers) as executor:
             futures = {}
             for idx, page_url in enumerate(images, 1):
@@ -767,7 +778,7 @@ class DownloadEngine:
                 if len(ext) > 5 or not ext.startswith("."):
                     ext = ".jpg"
                 dest_file = safe_path_join(chap_folder, pad_filename(f"{idx}{ext}"))
-                req_headers = provider.get_request_headers(page_url)
+                req_headers = provider.get_request_headers(page_url, chapter_url=chap_url)
                 future = executor.submit(self.download_page_file, page_url, dest_file, self.session, req_headers)
                 futures[future] = idx
 
