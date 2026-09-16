@@ -13,7 +13,7 @@
   <a href="#-principais-recursos"><img src="https://img.shields.io/badge/Fontes-Keiyoushi%202200%2B-22C55E.svg?style=flat-square" alt="Fontes Keiyoushi" /></a>
   <a href="#-segurança-e-hardening-de-código"><img src="https://img.shields.io/badge/Security-SSDLC%20Audited-38BDF8.svg?style=flat-square" alt="Security Audited" /></a>
   <a href="#-instalação-e-execução"><img src="https://img.shields.io/badge/Python-3.10%2B-blue.svg?style=flat-square" alt="Python 3.10+" /></a>
-  <a href="https://github.com/carlosjrgit/MangaDex_Downloader_CJrTools/releases/tag/v2.0.0"><img src="https://img.shields.io/badge/Release-v2.0.0-orange.svg?style=flat-square" alt="GitHub Release" /></a>
+  <a href="https://github.com/carlosjrgit/MangaHubRip_CJrTools/releases/tag/v2.0.0"><img src="https://img.shields.io/badge/Release-v2.0.0-orange.svg?style=flat-square" alt="GitHub Release" /></a>
 </p>
 
 > **MangaHubRip_CJrTools é uma poderosa suíte desktop para arquivamento e download de mangás, manhwas e manhuas. Integrando a robusta base de fontes Keiyoushi, suporte nativo a grandes plataformas (MangaDex, MangaFire, MangaLivre, sites WordPress/Madara) e um motor universal com bypass stealth anti-bot, o programa permite explorar catálogos por idioma, enfileirar capítulos com download paralelo de alta velocidade e empacotar automaticamente suas leituras em arquivos digitais .CBZ organizados.**
@@ -120,7 +120,7 @@ O projeto cumpre com as diretrizes do nosso ciclo de desenvolvimento seguro:
 
 ### Opção A — Executável Pré-Compilado (Windows x64)
 Para usuários que desejam executar o programa diretamente, sem instalar Python ou dependências:
-1. Acesse a página oficial de [GitHub Releases](https://github.com/carlosjrgit/MangaDex_Downloader_CJrTools/releases/tag/v2.0.0).
+1. Acesse a página oficial de [GitHub Releases](https://github.com/carlosjrgit/MangaHubRip_CJrTools/releases/tag/v2.0.0).
 2. Baixe o executável `MangaHubRip_CJrTools-v2.0.0-Windows-x64.exe`.
 3. *(Opcional)* Verifique a integridade do arquivo através do arquivo `SHA256SUMS.txt`.
 4. Execute o programa com dois cliques.
@@ -135,8 +135,8 @@ Para usuários que desejam executar o programa diretamente, sem instalar Python 
 
 #### 2. Clonar o Repositório
 ```powershell
-git clone https://github.com/carlosjrgit/MangaDex_Downloader_CJrTools.git
-cd MangaDex_Downloader_CJrTools
+git clone https://github.com/carlosjrgit/MangaHubRip_CJrTools.git
+cd MangaHubRip_CJrTools
 ```
 
 #### 3. Instalar Dependências

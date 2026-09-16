@@ -739,7 +739,7 @@ class KeiyoushiSourceProvider(BaseMangaProvider):
 
         # Se requisição direta foi bem sucedida, tentar extração estruturada
         if not use_playwright and soup:
-            info = self._extract_from_soup(soup, html_text, url, session, source_name)
+            info = self._extract_from_soup(soup, html_text, url, session, source_name, source_lang=source_lang)
             if info and info.get("chapters"):
                 info["available_langs"] = [source_lang.lower()]
                 info["provider"] = "keiyoushi"
@@ -756,7 +756,8 @@ class KeiyoushiSourceProvider(BaseMangaProvider):
         html_text: str,
         url: str,
         session: requests.Session,
-        source_name: str
+        source_name: str,
+        source_lang: str = "pt-br",
     ) -> Optional[Dict[str, Any]]:
         # Título
         title = ""
@@ -1198,7 +1199,6 @@ class KeiyoushiSourceProvider(BaseMangaProvider):
 
     def _get_chapter_pages_playwright(self, chap_url: str) -> List[str]:
         from playwright.sync_api import sync_playwright
-        import json
         import time
 
         api_pages: List[str] = []

@@ -19,8 +19,8 @@ Recomendamos utilizar um ambiente virtual isolado (`venv`):
 
 ```bash
 # 1. Clonar o repositório
-git clone https://github.com/carlosjrgit/MangaDex_Downloader_CJrTools.git
-cd MangaDex_Downloader_CJrTools
+git clone https://github.com/carlosjrgit/MangaHubRip_CJrTools.git
+cd MangaHubRip_CJrTools
 
 # 2. Criar o ambiente virtual
 python -m venv .venv

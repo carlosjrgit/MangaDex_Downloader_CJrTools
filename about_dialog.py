@@ -84,7 +84,7 @@ class AboutDialog(QDialog):
         lbl_logo = QLabel()
         lbl_logo.setAlignment(Qt.AlignCenter)
         base_dir = Path(sys._MEIPASS) if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS") else Path(__file__).resolve().parent
-        
+
         # Procura logo.png ou logo.jpg
         logo_path = base_dir / "assets" / "logo.png"
         if not logo_path.is_file():
